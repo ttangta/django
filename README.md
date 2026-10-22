@@ -185,3 +185,77 @@ from django.http import HttpResponse
 def index(request):
   return HttpResponse("Hello Django")
 ```
+
+**실제 요청과 응답 흐름**
+
+_HTML 템플릿 사용_
+
+![프로젝트의 urls.py](./images/프로젝트_urls%20코드.png)
+
+서버 실행 후 http://127.0.0.1:8000/articles/ URL 경로로 요청 전달
+
+![HTML 템플릿 사용 응답](./images/app_view%20템플릿사용.png)
+
+![지정된 templates 디렉터리](./images/HTML%20템플릿사용%20시%20지정%20디렉터리.png)
+
+HTML 템플릿을 사용하려면 기본 설정에서는 `templates` 라는 이름의 디렉터리를 사용해야 함
+
+정확히는 `templates` 디렉터리는 앱 내부에서도 생성할 수 있고, 프로젝트 공통 디렉터리로도 생성할 수 있다
+
+단, `templates` 라는 이름이 모든 상황에서 강제되는 것이 아닌. 프로젝트의 `settings.py` 에서 `TEMPLATES` 의 `DIRS` 설정을 변경하면 다른 이름의 디렉터리로도 사용할 수 있음
+
+![HTML 템플릿 코드](./images/HTML템플릿.png)
+
+![응답 결과](./images/응답결과.png)
+
+---
+
+_HttpResponse 객체 사용_
+
+서버 실행 후 http://127.0.0.1:8000/nonetemplate/ URL 경로로 요청 전달
+
+![HttpResponse 객체 사용 경로](./images/HttpResponse%20객체%20사용.png)
+
+![HttpResponse 객체 사용 view 함수](./images/HttpResponse%20view%20함수.png)
+
+![HttpResponse 객체 사용 결과](./images/HttpResponse%20객체%20사용%20결과.png)
+
+---
+
+**HTML 템플릿 vs HttpResponse 객체 차이**
+
+Django에서는 클라이언에게 응답을 반환할 때 `HttpResponse()` 와 `render()` 를 사용할 수 있음
+
+1. **HttpRespnse()**
+- HTTP 응답 객체를 직접 생성하는 클래스
+- 응답할 내용을 직접 작성하여 반환
+- HTML 템플릿을 자동으로 사용하지 않음
+
+```python
+from django.http import HttpResponse
+
+def index(request):
+  return HttpResponse("<h1>Hello Django!</h1>")
+```
+
+2. **render()**
+- HTML 템플릿을 렌더링하여 HTML 응답을 생성하는 함수
+- 별도의 HTML 템플릿 파일을 사용
+- `context` 를 통해 HTML 템플릿에 데이터 전달 가능
+- 최종적으로 `HttpRespnse` 객체 반환
+
+```python
+from django.shortcuts import render
+
+def index(request):
+  return render(request, "articles/index.html")
+```
+
+**요약**
+
+|구분|`HttpRespnse()`|`render()`|
+|:---:|---|---|
+|종류|클래스|함수|
+|응답 생성|응답 내용 직접 생성|HTML 템플릿 렌더링|
+|HTML 템플릿|자동 사용 X|사용 O|
+|반환객체|HttpRespnse|HttpResonse|
