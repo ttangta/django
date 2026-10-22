@@ -91,3 +91,97 @@ python manage.py runserver
 ![django 서버 실행](./images/django%20서버실행.png)
 
 ![django 서버 실행결과](./images/django%20서버실행%20결과.png)
+
+## 4. 요청(Request)와 응답(Response)
+
+Django는 Client의 요청(Request)을 받아 처리하고, 그 결과를 응답(Response) 으로 반환하는 웹 프레임워크
+
+**요청과 응답이란?**
+
+- 요청(Request) : 클라이언트가 서버에 특정 작업을 요청하는 것
+- 응답(Response) : 서버가 클라이언트의 요청을 처리한 후 결과를 반환하는 것
+
+![요청과 응답](./images/요청과응답.png)
+
+> 게시판 접속 상황의 예시
+> 
+> 1. 사용자가 브라우저에서 게시글 목록 URL에 접속
+> 2. 브라우저가 Django 서버에 HTTP 요청 전송
+> 3. Django 서버가 요청을 처리
+> 4. Django 서버가 HTML 등의 결과를 HTTP 응답으로 반환
+> 5. 브라우저가 응답받은 HTML을 화면에 표시
+>
+
+**Django 요청 처리 과정**
+
+![요청 처리 과정](./images/django요청처리과정.png)
+
+실제로는 View가 필요애 따라 데이터베이스의 데이터를 조회하거나 저장하기 위해 `modles.py` 를 사용할 수 있음
+
+**Django 요청과 응답 코드 예시**
+
+1. URL 요청 연결
+
+```python
+# firstpjt/urls.py
+
+# 클라이언트가 'articles/' URL로 요청하면 views.py 의 index 함수를 실행하도록 연결
+
+from django.contrib import admin
+from django.urls import path
+# 프로젝트 내 app 디렉토리의 views 모델 추가
+from articles import views
+
+urlpatterns = [
+  path('admin/', admin.site.urls),
+  path('articles/', views.index),
+]
+```
+
+2. 요청 처리
+
+```python
+# articles/views.py
+
+# Django의 View 함수는 요청 객체를 전달하고, 응답 객체를 반환
+
+# request : 클라이언트가 보낸 HTTP 요청 객체를 담은 객체
+# render() : 템플릿을 이용하여 HTML 응답을 생성하는 함수
+# "articles/index.html" : 응답에 사용할 HTML 템플릿
+
+from django.shortcuts import render
+
+def index(request):
+  return render(request, "articles/index.html")
+```
+
+3. HTML 템플릿
+
+```HTML
+<!--Django는 해당 템플릿을 이용해 HTML 응답을 생성하고 클라이언트에게 반환-->
+<!DOCTYPE html>
+<html>
+<head>
+  <title>게시판</title>
+</head>
+<body> 
+  <h1>게시글 목록</h1>
+</body>
+</html>
+```
+
+**요청과 응답에 사용하는 주요 객체**
+
+|구분|Django 객체|역할|
+|:---:|:---:|---|
+|요청 (Request)|`HttpRequest`|클라이언트의 요청 정보 저장|
+|응답 (Response)|`HttpResponse`|클라이언트에게 변환할 응답 정보 저장|
+
+```python
+# HTML 템플릿을 사용하지 않고 직접 응답할 수도 있음
+
+from django.http import HttpResponse
+
+def index(request):
+  return HttpResponse("Hello Django")
+```
