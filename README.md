@@ -259,3 +259,53 @@ def index(request):
 |응답 생성|응답 내용 직접 생성|HTML 템플릿 렌더링|
 |HTML 템플릿|자동 사용 X|사용 O|
 |반환객체|HttpRespnse|HttpResonse|
+
+## 5. WSGI와 ASGI
+
+Django 프로젝트 디렉터리 하위에 `wsgi.py` 와 `asgi.py` 는 각각 WSGI 서버와 Django 연결, ASGI 서버와 Django 연결
+
+WSGI, ASGI는 클라이언트의 HTTP 요청을 받아 Django 애플리케이션에 전달하고, Django가 처리한 응답을 클라이언트에 전달하는 역할을 수행
+
+**두 방식의 가장 큰 차이는 동기(Synchronous) 방식과 비동기(Asynchronous) 방식의 지원 여부**
+
+**WSGI (Web Server Gateway Interface)**
+
+![WSGI](./images/WSGI.png)
+
+Python 웹 서버와 웹 애플리케이션을 연결하기 위한 표준 인터페이스
+
+주로 동기 방식의 요청 처리를 위해 설계
+
+- **동기 방식 중심** : 일반적으로 요청을 처리하는 동안 해당 실행 흐름은 작업이 끝날 때까지 기다림
+- **HTTP 요청 처리** : 일반적인 웹 페이지 조회, 게시글 CRUD 등의 기능에 적합
+- **대표적인 서버** : Gunicorn, uWSGI
+
+1. 클라이언트가 게시글 목록을 요청
+2. WSGI 서버가 Django에 요청을 전달
+3. Django의 View 함수가 요청을 처리
+4. 처리된 결과를 WSGI 서버를 통해 클라이언트에 반환
+
+---
+
+**ASGI (Asynchronous Server Gateway Interface)**
+
+![ASGI](./images/ASGI.png)
+
+WSGI의 한계를 보완하여 비동기 처리와 장시간 유지되는 연결을 지원하도록 설계된 인터페이스
+
+- **동기 및 비동기 지원** : 동기 코드와 비동키 코드를 모두 처리할 수 있음
+- **다양한 통신 프로토콜** : HTTP뿐 아니라 WebSocket 등의 연결도 지원
+- **대표적인 서버** : Uvicorn, Daphen, Hypercorn
+
+단, ASGI를 사용한다고 모든 Django 코드가 자동으로 비동기가 되는 것이 아님
+
+**WSGI와 ASGI 비교 요약**
+
+|구분|WSGI|ASGI|
+|---|---|---|
+|명칭|Web Server Gateway Interface|Asynchronous Server Gateway Interface|
+|처리 방식|동기 중심|동기 + 비동기|
+|HTTP|지원|지원|
+|WebSocket|표준에서 미지원|지원
+|활동 예시|일반적인 웹 서비스|일반 웹 서비스, 실시간 통신|
+
