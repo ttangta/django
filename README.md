@@ -309,3 +309,56 @@ WSGI의 한계를 보완하여 비동기 처리와 장시간 유지되는 연결
 |WebSocket|표준에서 미지원|지원
 |활동 예시|일반적인 웹 서비스|일반 웹 서비스, 실시간 통신|
 
+---
+
+## 6. 프로젝트 `Settings.py` 추가 정보
+
+> #### 1. 한국어를 기본 언어로 변경하는 방법
+> - `settings.py` 파일에서 `LANGUAGE_CODE` 를 수정
+> ```python
+># 변경 전
+>LANGUAGE_CODE = 'en-us'
+>
+>TIME_ZONE = 'UTC'
+>
+>USE_I18N = True
+>
+>USE_TZ = True
+> ```
+>---
+>```python
+># 변경 후
+>LANGUAGE_CODE = 'ko-kr'
+>
+>TIME_ZONE = 'Asia/Seoul'
+>
+>USE_I18N = True
+>
+>USE_TZ = True
+>```
+>각 설정의 의미
+>
+>|설정|설명|
+>|---|---|
+>|`LANGUAGE_CODE = 'ko-kr'`|Django의 기본 언어를 한국어로 설정|
+>|`TIME_ZONE = 'Asia/Seoul'`|기본 시간대를 한국 표준시로 설정|
+>|`USE_I18N = True`|Django의 다국어 번역 기능 활성화|
+>|`USE_TZ = True`|시간대 정보를 고려한 날짜 및 시간 처리 활성화|
+>
+> 적용 결과
+>
+> 설정을 변경하면 Django에서 제공하는 번역 가능한 기본 메시지들이 한국어로 표시됨
+>
+> 예를 들면 Django 관리자 페이지 (`/admin/`)의 로그인 확인이나 기본 안내 메시지가 한국어로 표시될 수 있다.
+>
+>단, 개발자가 직접 작성흰 HTML 자동으로 한국어로 번역되는 것은 아님
+>
+> ---
+>
+>**핵심 정리** : Django 프로젝트에서 한국어를 기본 언어로 사용하려면
+>
+> `settings.py` 의 `LANGUAGE_CODE = 'ko-kr'` 로 변경하면 됨.
+>
+> 한국 시간대까지 적용하려면 `TIME_ZONE = 'Asia/Seoul'` 도 함께 설정하면 됨
+
+
