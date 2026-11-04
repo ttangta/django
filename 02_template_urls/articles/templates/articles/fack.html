@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form action="https://search.naver.com/search.naver" method="GET">
+  <label for="query">검색어를 입력하세요</label>
+  <input type="text" name="query" id="query">
+  <button type="submit">검색</button>
+</form>
+{% endblock content %}

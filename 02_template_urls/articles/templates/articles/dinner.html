@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block content %}
+<p>{{ picked }} 메뉴는 {{ picked|length }}글자 입니다.</p>
+<h3>메뉴판</h3>
+<ul>
+{% for m in menu %}
+  <li>{{ m }}</li>
+{% endfor %}
+</ul>
+
+{% if age >= 20 %}
+<p>주류 구매 가능</p>
+<ul>
+  {% for a in alcohol %}
+    <li>{{ a }}</li>
+  {% endfor %}
+</ul>
+{% else %}
+<p>주류 구매 불가</p>
+{% endif %}
+{% endblock content %}

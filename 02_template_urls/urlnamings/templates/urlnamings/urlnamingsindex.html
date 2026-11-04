@@ -1,0 +1,7 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Naming URL Patterns 사용</h1>
+  <p>경로를 직접 작성하는 것이 아닌 URL 패턴에 지정된 name 속성의 이름을 통해 경로를 생성</p>
+  <a href="{% url "move" %}">move 페이지로 이동</a>
+{% endblock content %}

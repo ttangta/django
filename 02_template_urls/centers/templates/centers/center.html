@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Namespace 학습을 위한 메인 페이지</h1>
+  <a href="{% url "app1:index" %}">app1의 인덱스 페이지로 이동</a>
+  <br>
+  <a href="{% url "app2:index" %}">app2의 인덱스 페이지로 이동</a>
+{% endblock content %}

@@ -23,3 +23,4 @@ urlpatterns = [
     path("articles/", views.index),
     path("nonetemplate/", views.none_template)
 ]
+
