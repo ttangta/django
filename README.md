@@ -1583,3 +1583,198 @@ Django 개발 환경에서는 `DEBUG=True` 일 때 슬래시 없는 POST 요청�
 |주의사항|URL 패턴 작성 시 후행 슬래시를 일관되게 사용|
 
 **Django의 `APPEND_SLASH`는 후행 슬래시가 없는 요청을 보완하는 기능이지, URL 패턴에서 후행 슬래시를 생략해도 된다는 의미는 아님**
+
+<br>
+
+## 21. Django Model (모델)
+
+**Django Model**은 데이터베이스의 **테이블 구조를 Python 클래스로 정의**하고, **데이터를 관리**할 수 있도록 하는 **Django의 구성 요소**
+
+Django는 Model을 통해 데이터베이스의 데이터를 생성(Create), 조회(Read), 수정(Update), 삭제(Delete)할 수 있음.
+
+해당 작업을 **CRUD**라고 함
+
+쉽게 말하면, **SQL을 직접 작성하지 않고도 Python 코드로 데이터베이스를 다룰 수 있도록 도와주는 역할**
+
+### Django Model과 데이터베이스의 관계
+
+![Model - DB](./images/Django%20Model과%20DB%20관계.png)
+
+|Django (Python)|데이터베이스 (DB)|
+|---|---|
+|Model 클래스|테이블(Table)|
+|Model 필드|열(Column)|
+|Model 인스턴스|행(Row)|
+|필드에 저장된 값|데이터 값|
+
+### Django Model 정의 방법
+
+`Article` 모델 생성 예시
+
+```python
+# articles/models.py
+
+from django.db import models
+
+class Article(models.Model):
+  title = models.CharField(max_length=100)
+  content = models.TextField()
+  created_at = models.DateTimeField(auto_now_add=True)
+```
+
+- `models.Model` : Django의 기본 Model 클래스를 상속받아 모델 정의
+- `title` : 최대  100자의 문자열을 저장하는 필드
+- `content` : 긴 문자열을 저장하는 필드
+- `created_at` : 데이터가 처음 생성되 때의 시간을 자동으로 저장
+
+Django는 기본 키를 직접 정의하지 않으면 **일반적으로 `id` 필드를 자동 추가**
+
+### Model과 실제 데이터베이스 테이블 비교
+
+위의 Model을 데이터베이스에 반영하면 다음과 같은 구조의 테이블이 생성됨
+
+![Article Model to Table](/images/Model로%20생성된%20Table.png)
+
+Python의 `Article` 클래스가 데이터베이스의 `articles_article` 테이블에 대응
+
+### Model을 데이터베이스에 반영하는 방법
+
+**Model 클래스를 작성**했다고 해서 데이터베이스에 **테이블이 즉시 생성되는 것 아님**
+
+**Migrations(마이그레이션)** 과정을 거쳐야 함
+
+#### 1단계 : 마이그레이션 파일 생성
+
+```bash
+python manage.py makemigrations
+```
+- **Model의 변경 사항을 분석**하여 마이그래이션 파일 생성
+
+
+#### 2단계 : 마이그레이션 적용
+
+```bash
+python manage.py migrate
+```
+- **마이그레이션**을 데이터베이스에 **적용**하여 **테이블을 생성하거나 구조**를 변경
+
+### Django Model로 데이터 관리하기
+
+```python
+from articles.models import Article
+
+# CREATE : 데이터 생성
+Article.objects.create(
+    title = '첫 번째 게시글',
+    content = 'Django Model 학습'
+)
+
+# READ : 전체 데이터 조회
+articles = Article.objects.all()
+
+# READ : 특정 데이터 조회
+article = Article.objects.get(pk=1)
+
+# UPDATE : 데이터 수정
+article.title = '수정된 제목'
+article.save()
+
+# DELETE : 데이터 삭제
+article.delete()
+```
+- `objects` 는 Django Model의 기본 Manger이며, 이를 통해 QuerySet API를 사용하여 데이터베이스를 조회하거나 조작할 수 있음
+
+### 핵심 정리
+
+|구분|설명|
+|---|---|
+|Model|데이터베이스의 **테이블 구조를 Python 클래스로 정의**|
+|`models.Model`|Django Model을 정의하기 위한 기본 클래스|
+|Model Field|데이터베이스 테이블의 열을 정의|
+|Model Instance|데이터베이스 테이블의 행에 대응하는 객체|
+|Migrations|Model의 구조 변경을 데이터베이스에 반영하는 과정|
+|ORM|Python 객체를 통해 데이터베이스를 조작하는 기술|
+|QuerySet API|데이터베이스의 데이터를 조회하고 조작하는 인터페이스|
+
+Django Model은 데이터베이스의 테이블 구조를 Python 클래스로 표현하며, ORM을 통해 SQL을 직접 작성하지 않고도 데이터를 관리할 수 있게 해주는 구성 요소
+
+**Model 정의 -> Migrations 적용 -> ORM을 통한 데이터 조작**
+
+<br>
+
+## 22. Django Model Class (모델 클래스)
+
+Model Class는 Django에서 데이터베이스 **테이블의 구조를 정의**하기 위해 작성하는 **Python 클래스**
+
+Django에서는 `django.db.models.Model` 클래스를 상속받아 Model Class를 정의
+
+**Model Class 내부**에는 데이터베이스에 저장할 **데이터의 종류와 속성을 정의**하는 Model Field(모델 필드) 작성
+
+### Model Class 정의 방법
+
+일반적으로 **각 앱의 `models.py` 파일**에 Model Class 작성
+
+![Model Class 작성 경로](./images/Model%20Class%20작성%20경로.png)
+
+### Model Class와 데이터베이스 테이블의 관계
+![ModelClass To Table](./images/ModelClass%20to%20Table.png)
+
+|Python Model Class|Database|
+|---|---|
+|`Article` 클래스|`articles_article` 테이블|
+|`Article` 인스턴스|테이블의 하나의 행(Row)|
+|`title` 필드|`title` 컬럼|
+|`content` 필드|`content` 컬럼|
+
+- Model Class를 정의했다고 데이터베이스 테이블이 바로 생성되는 것 아님
+- `makemigrations` 와 `migrate` 명령어를 통해 Model Class 구조를 데이터베이스에 반영해야 함
+
+### Model Class와 Model Instance 차이
+
+#### Model Class
+
+데이터베이스에 저장할 **데이터의 구조를 정의**하는 클래스
+
+#### Model Instance
+
+**Model Class를 기반**으로 생성된 하나의 **Python 객체**
+
+```python
+article = Article(
+  title = 'Django 학습',
+  content = 'Model Class 학습 중'
+)
+
+article.save()
+```
+1. `Article(...)` 을 호출하여 Model Instance 생성
+2. `title`, `content` 필드에 값 설정
+3. `article.save()` 호출하여 데이터베이스에 저장
+
+즉, **Model Class는 데이터 구조**를 정의, **Model Instance는 실제 데이터를 담는 객체**
+
+Model Instance를 생성하는 것만으로 데이터베이스에 저장되지는 않음.
+`save()` 를 호출해야 데이터베이스에 저장됨
+
+### Model Class 의 특징
+- **Python 클래스로 정의** : 별도의 SQL 테이블 생성문 없이 Python 코드로 데이터베이스 구조 정의 
+- **`models.Model` 상속** : **Django ORM 기능**을 제공받아 **데이터베이스 조작 가능**
+- **필드 정의** : `CharField`, `IntegerField`, `DateTimeField` 등을 사용하여 데이터의 종류와 속성을 정의
+- **기본 키 자동 생성** : 별도의 기본 키를 정의하지 않으면 Django가 **일반적으로 id 필드를 자동으로 생성**
+- **데이터베이스 테이블과 연결** : 기본적으로 하나의 **구체적인 Model Class**는 **하나의** 데이터베이스 **테이블에 대응**
+
+### 핵심 정리
+
+|구분|설명|
+|---|---|
+|Model Class|데이터베이스 테이블의 구조를 정의하는 Python 클래스|
+|`models.Model`|Django Model Class가 상속받는 기본 클래스|
+|Model Field|테이블의 컬럼에 대응하는 클래스 속성|
+|Model Instance|Model Class를 기반으로 생성한 데이터 객체|
+|Migrations|Model Class의 구조를 데이터베이스에 반영|
+
+Django Model Class는 `models.Model` 을 상속받아 데이터베이스 테이블의 구조를 Python 코드로 정의하는 클래스
+
+- Model Class = 데이터 구조 정의
+- Model Instance = 실제 데이터를 담는 객체
+- Database Table = 데이터가 저장되는 공간
