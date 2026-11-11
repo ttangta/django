@@ -1778,3 +1778,260 @@ Django Model Class는 `models.Model` 을 상속받아 데이터베이스 테이�
 - Model Class = 데이터 구조 정의
 - Model Instance = 실제 데이터를 담는 객체
 - Database Table = 데이터가 저장되는 공간
+
+<br>
+
+## 23. Django Model Field
+
+Model Field(모델 필드) 는 Django의 **Model 클래스에서 데이터베이스 테이블의 컬럼(Column)을 정의**하기 위해 사용하는 클래스
+
+Django에서는 **Python 코드로 데이터베이스의 테이블 구조를 정의**할 수 있으며, 이때 **각 컬럼의 데이터 타입과 제약 조건**을 **Model Field로 지정**
+
+```python
+from django.db import models
+
+class Article(models.Model):
+  title = models.CharField(max_length=100)
+  content = models.TextField()
+  created_at = models.DateTimeField(auto_now_add=True)
+```
+- `CharField`, `TextField`, `DateTimeField` 모두 Model Field
+
+### 데이터베이스와의 관계
+
+![Model Field를 사용한 Model Class와 DB Table 관계](./images/Model%20Field를%20사용한%20Model%20Class와%20DB%20table.png)
+- 즉, **Model 클래스는 테이블을 정의**하고, **Model Field는 테이블의 각 컬럼을 정의**하는 역할
+
+### Django 주요 Model Field 종류
+
+Django에서는 **저장하려는 데이터 종류에 따라** 다양한 **Field 제공**
+
+|Field|설명|예시|
+|---|---|---|
+|CharField|길이가 제한된 문자열|제목, 이름|
+|TextField|긴 문자열|게시글 본문|
+|IntegerField|정수|나이, 수량|
+|FloatField|부동소수점 숫자|측정값|
+|DecimalField|고정 정밀도 십진수|가격, 금액|
+|BooleanField|참 또는 거짓|공개 여부|
+|DateField|날짜|생년월일|
+|TimeField|시간|시작 시간|
+|DateTimeField|날짜와 시간|작성 일자|
+|EmailField|이메일 형식 문자열|이메일 주소|
+|URLField|URL 형식 문자열|웹사이트 주소|
+|FileField|파일 경로 정보|첨부파일|
+|ImageField|이미지 파일 경로 정보|프로필 사진|
+|ForeignKey|다른 모델과 N:1 관계|게시글 작성자|
+|OneToOneField|다른 모델과 1:1 관계|사용자 프로필|
+|ManyToManyField|다른 모델과 N:M 관계|게시글 태그|
+
+#### 예시 : 회원 모델
+
+```python
+class User(models.Model):
+  username = models.CharField(max_length=30)
+  age = models.IntegerField()
+  email = models.EmailField()
+  is_active = models.BooleanField(default=True)
+  joined_at = models.DateTimeField(auto_now_add=True)
+```
+- **각 필드는 서로 다른 종류의 데이터를 저장**하도록 정의
+
+### Model Field의 주요 옵션
+
+Model Field에는 **데이터의 저장 방식과 제약 조건을 지정할 수 있는 Field Options(필드 옵션)** 존재
+
+```python
+title = models.CharField(
+  max_length=100,
+  null = False,
+  blank = False,
+  unique = True,
+  default = '제목 없음'
+)
+```
+
+|옵션|설명|
+|---|---|
+|`max_length`|문자열의 최대 길이|
+|`null`|DB에 NULL 저장 허용 여부|
+|`blank`|유효성 검사에서 빈 값 허용 여부|
+|`default`|기본값 지정|
+|`unique`|중복 값 저장 방지|
+|`primary_key`|기본 키 지정|
+|`db_index`|데이터베이스 인덱스 생성|
+|`auto_now_add`|최초 생성 시 현재 날짜/시간 저장|
+|`auto_now`|저장할 때마다 현재 날짜/시간 갱신|
+
+- `null=True` : 데이터베이스에 NULL을 저장할 수 있도록 허용
+- `blank=True` : Django의 모델 유효성 검사나 폼에서 빈 값을 허용
+
+즉, **null은 데이터베이스 저장 관련**, **blank는 유효성 검사 관련**
+
+### Model Field가 데이터베이스에 반영되는 방법
+
+Model Field를 작성했다고 데이터베이스에 테이블이나 컬럼이 즉시 생성되는 것 아님
+
+- Model Class 작성이 데이터베이스 테이블 생성 아님과 같은 맥락
+
+![Model Class & Field 작성 -> DB Table 반영](./images/Model%20Class%20&%20Field%20Table%20반영%20과정.png)
+
+### Model Field의 제약조건 과 동작 차이
+
+#### 제약 조건 (Constraints)
+데이터가 만족해야 하는 규칙을 정의하여, 잘못된 데이터의 저장을 제한하는 것
+
+- `unique=True` : 중복 값 저장 제한
+- `null=False` : DB에 NULL 값 저장 제한
+- `max_length=100` : 문자열 최대 길이 지정 (유효성 검사에도 활용)
+
+#### 동작 설정 (Behavior)
+**데이터를 생성하거나 저장**할 때 **Django가 수행할 작업이나 처리 방식을 지정**하는 것
+
+- `auto_now_add=True` : 객체 최초 생성 시 현재 날짜와 시간 자동 설정
+- `auto_now=True` : 객체 저장 시 현재 날짜와 시간 자동 갱신
+- `default=값` : 값이 지정되지 않은 경우 기본값 사용
+
+#### 핵심 차이
+
+|구분|제약 조건|동작 설정|
+|---|---|---|
+|목적|데이터의 저장 규칙 정의|데이터 처리 방식 정의|
+|핵심 질문|어떤 데이터를 허용할 것인가?|데이터를 어떻게 처리할 것인가?|
+|대표 옵션|`unique`, `null`, `max_length`|`auto_now_add`, `auto_now`, `default`|
+
+- **제약 조건**은 데이터가 지켜야 할 **규칙**이고, **동작 설정**은 Django가 **데이터를 처리하는 방식**
+
+
+### 핵심 정리
+
+|구분|핵심 내용|
+|Model|데이터베이스 테이블 구조를 정의하는 Python 클래스|
+|Model Field|테이블의 컬럼을 정의하는 클래스|
+|Field Type|컬럼에 저장할 데이터의 종류를 지정|
+|Field Options|컬럼의 제약 조건 및 동작을 설정|
+|Migrations|Model의 변경 사항을 DB 구조에 반영하는 과정|
+
+- Django Model Field는 Model 클래스 내부에서 데이터베이스 컬럼의 데이터 타입, 제약 조건 및 관계를 정의하는 구성 요소
+- **Model Field**는 **단순한 Python 변수 선언이 아니라**, Django **ORM이 데이터베이스 구조와 데이터를 다루는 데 사용하는 필드** 정의
+- Model Field는 Django Model 클래스에서 데이터베이스 컬럼의 데이터 타입, 제약 조건 및 유효성 검사 규칙을 정의하고, **필드 종류에 따른 부가 기능을 제공**하는 구성 요소
+- **Model Field에 유효성 검사 규칙이 정의되어 있더라도** 모든 데이터 **저장 과정에서 자동으로 실행되는 것은 아님.** **유효성 검사 실행 시점과 데이터베이스 제약 조건의 적용은 구분**해야 함
+
+<br>
+
+## 24. Migrations
+
+**Migrations(마이그레이션)** 는 Django의 **Model 클래스에서 발생한 변경 사항을 데이터베이스의 실제 테이블 구조(Schema)에 반영하고 관리**하는 기능
+
+**Django에서는 Python 코드로 데이터베이스 구조를 정의**하지만, **Model 클래스를 작성하거나 수정**한다고 해서 **데이터베이스에 즉시 반영되는 것은 아님**
+
+따라서 **Migrations를 통해 Model의 변경 사항을 데이터베이스에 적용해야 함**
+
+### Migrations 주요 역할
+
+- **테이블 생성** : 새로운 Model에 대응하는 데이터베이스 테이블 생성
+- **테이블 수정** : 기존 테이블의 컬럼 추가, 삭제, 변경
+- **테이블 삭제** : 삭제된 Model에 대응하는 테이블 제거
+- **변경 이력 관리** : 데이터베이스 구조의 변경 과정을 마이그레이션 파일로 기록
+
+### Migrations 동작 과정
+
+![Migrations 동작 과정](./images/Model%20Class%20&%20Field%20Table%20반영%20과정.png)
+
+#### 1. makemigrations
+
+```bash
+python manage.py makemigrations
+```
+![실제 코드 Migrations 동작 과정](./images/Model%20Class를%20통해%20Migration%20파일%20생성.png)
+- 해당 코드는 아직 `migrate` 는 실행하지 않은 상태
+- Model의 변경 사항을 감지
+- 변경 사항을 기록한 마이그레이션 파일을 생성
+- **데이터베이스 구조를 직접 변경하지는 않는다.**
+
+
+
+#### 2. migrate
+
+```bash
+python manage.py migrate
+```
+![실제 코드 Migrate 실행](/images/Migrate%20명령어%20실행.png)
+
+- 아직 적용되지 않은 마이그레이션을 확인.
+- 마이그레이션 파일에 정의된 작업을 데이터베이스에 적용.
+- 적용된 마이그레이션 이력을 기록
+
+#### 3. 데이터베이스에 Model Class와 대응되는 Table 생성 & Migrations 이력 기록 
+
+![migrate 결과 1](./images/Migrate%20결과%201.png)
+![migrate 결과 2](./images/Migrate%20결과%202.png)
+
+### Model Class 수정 --> 추가 Migrations
+
+이미 생성된 `Article` 모델에 새로운 필드를 추가하는 상황
+
+```python
+class Article(models.Model):
+  title = models.CharField(max_length=100)
+  content = models.TextField()
+  created_at = models.DateTimeField(auto_now_add=True)
+  updated_at = models.DateTimeFIeld(auto_now=True)
+```
+- 기존 Model Class에 변경이 되는 경우에도 마이그레이션 과정이 필요
+
+```bash
+python manage.py makemigrations
+python manage.py migrate
+```
+
+#### 모델 수정 후 Migration 파일 생성 시 발생 이슈
+![추가 Migrations 이슈](/images/추가%20Migrations%20이슈.png)
+
+>#### 발생 원인
+> **기존 Model**에 `null=False` 인 **새로운 필드를 추가**하면서 기본값을 지정하지 않으면, Django는 **기존 데이터에 채울 값을 결정할 수 없기 때문에 기본값을 요구**
+>
+> 중요한 점은 Django가 실제 테이블에 데이터가 존재하는지 확인한 후 프롬프트를 표시하는 것이 아님 **(테이블에 데이터가 존재하지 않더라도 요구)**
+>
+> `makemigrations`는 주로 Model의 변경 사항과 기존 마이그레이션 상태를 비교하기 때문에, 실제 테이블이 비어 있어도 프롬프트 발생
+
+![추가 Migrations 시 기본값 요구 프롬프트](./images/추가될%20Model%20Field에%20기본값을%20요구하는%20프롬프트.png)
+- 1번 옵션 : 현재 프롬프트를 유지하면서 직접 기본 값을 입력하는 방법
+  - 해당 옵션을 선택 후 아무 것도 입력하지 않고 enter 누르면 Django가 제안하는 기본 값으로 설정 됨
+- 2번 옵션 : 현재 프롬프트를 나간 후 `models.py`에 기본 값 관련 설정을 하는 방법
+
+Django는 기존 데이터의 존재 여부와 관계없이, **기본값이 없는 `null=False` 필드를 추가할 때** 마이그레이션의 안전한 적용을 위해 **기본값을 요구**
+
+![기본값 설정 프롬프트 이후 추가된 마이그레이션 파일](./images/추가%20Migrations%20후%20생성된%20Migration%20파일.png)
+
+#### migrate 명령어 실행
+
+![추가 Migrations migrate 결과 1](./images/추가%20Migrations%20migrate%20결과%201.png)
+
+![추가 Migrations migrate 결과 2](./images/추가%20Migrations%20migrate%20결과%202.png)
+
+### Migrations 유용한 명령어
+
+#### 1. 주요 명령어
+
+|명령어|설명|
+|---|---|
+|`makemigrations`|모델 변경 사항을 감지하여 마이그레이션 파일 생성|
+|`migrate`|마이그레이션을 DB에 적용|
+|`showmigrations`|마이그레이션 파일 목록과 적영 여부 확인|
+|`sqlmigrate`|마이그레이션이 실행할 SQL 확인|
+|`migrate 앱이름 zero`|특정 앱의 마이그레이션을 모두 되돌리기|
+
+#### 2. 추가적인 유용한 옵션
+
+|명령어|설명|
+|---|---|
+|`makemigrations --dry-run`|파일을 생성하지 않고 변경 사항 미리 확인|
+|`makemigrations --check`|모델에 반영되지 않은 변경 사항이 있으면 실패 상태로 종료|
+|`migrate --plan`|실행 예정인 마이그레이션 계획 확인|
+|`showmigrations --plan`|의존성 순서에 따른 마이그레이션 목록 확인|
+|`makemigrations --empty articles`|빈 마이그레이션 파일 생성|
+
+![showmigrations 실행 예시](./images/showmigrations%20명령어%20실행%20예시.png)
+
+- `[X]` 표시는 실행된 마이그레이션 파일 의미
