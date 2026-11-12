@@ -2035,3 +2035,358 @@ Django는 기존 데이터의 존재 여부와 관계없이, **기본값이 없�
 ![showmigrations 실행 예시](./images/showmigrations%20명령어%20실행%20예시.png)
 
 - `[X]` 표시는 실행된 마이그레이션 파일 의미
+
+<br>
+
+## 25. Django Admin Site
+
+**Django Admin Site** 는 관리자가 **웹 브라우저를 통해 데이터베이스의 데이터를 관리**할 수 있도록 **Django가 기본 제공하는 관리자 인터페이스**
+
+일반적으로 데이터베이스의 데이터를 관리하려면 SQL문을 작성하거나 Django ORM을 사용해야 하지만, **Admin Site를 이용하면 웹 화면에서 데이터를 쉽게 관리할 수 있음**
+
+![Admin Site](./images/Django%20Admin%20Site.png)
+- http:127.0.0.1:8000/admin/  접속
+
+
+#### Article Model 데이터 관리 예시
+
+|관리 작업|Django ORM|Admin Site|
+|---|---|---|
+|게시글 생성|`Article.objects.create()`|등록 버튼|
+|게시글 조회|`Article.objects.all()`|목록 화면|
+|게시글 수정|`객체 수정 후 .save()`|수정 화면|
+|게시글 삭제|`article.delete()`|삭제 버튼|
+
+- 관리자가 별도의 **관리자 페이지를 직접 개발하지 않고도** 데이터를 관리할 수 있도록 지원
+
+### Django Admin Site 동작 과정
+
+![Admin Site 동작 과정](./images/Django%20Admin%20Site%20동작%20과정.png)
+
+1. 관리자가 Admin Site에서 게시글 정보를 입력하고 저장
+2. Django Admin이 요청을 받아 유효성 검사와 저장 처리
+3. Django ORM이 필요한 SQL 생성
+4. 데이터베이스에 게시글 저장
+5. 처리 결과가 관리자 화면에 표시
+
+### Django Admin Site의 주요 특징
+
+|특징|설명|
+|---|---|
+|자동 관리자 페이지|Django가 기본적인 관리자 인터페이스 제공|
+|데이터 관리|데이터 생성, 조회, 수정, 삭제 (CRUD)|
+|ORM 기반|SQL을 직접 작성하지 않고 데이터 관리|
+|인증 및 권한|관리자 로그인과 사용자별 접근 권한 관리|
+|커스터마이징|관리자 화면에 표시할 필드나 검색 기능 등을 설정|
+
+즉, Django Admin Site는 데이터베이스를 관리하기 위한 관리자 전용 웹 인터페이스
+
+
+### Django Admin Site 사용 방법
+
+#### 1. 관리자 계정 생성
+Django Admin Site에 로그인하려면 관리자 권한 계정 필요
+```bash
+python manage.py createsuperuser
+```
+![super user 생성과정](./images/Super%20User%20생성.png)
+![super user 생성 결과](./images/Super%20User%20데이터%20테이블에%20저장.png)
+
+#### 2. Model 등록
+Django Admin Site는 **모델을 생성했다고** 해서 **자동으로 모든 모델을 관리하는 화면을 표시하지 않음**
+
+관리하고 싶은 모델을 각 앱의 `admin.py` 에 등록해야 함
+
+`Article` 모델 등록 하고자 할 때 -> `articles/admin.py` 에 등록
+
+![Model Class 등록](./images/Model%20Class%20admin.py에%20등록.png)
+
+해당 작업까지 완료 후 `Admin Site` 에서 관리자 계정으로 로그인 후 `Aritlce` 모델에 
+
+**데이터를 생성, 조회, 수정, 삭제 가능**
+
+### Django Admin Site 커스터마이징
+
+Django Admin Site는 **관리자 화면에 표시되는 데이터도 설정 가능**
+
+```python
+# articles/admin.py
+
+from django.contrib import admin
+from .models import Article
+
+@admin.register(Article)
+class ArticleAdmin(admin.ModelAdmin):
+  list_display = ('id', 'title')
+  search_fields = ('title',)
+  list_display_links = ('titles',)
+```
+
+|옵션|역할|
+|---|---|
+|`list_display`|목록 화면에 표시할 필드 지정|
+|`search_fields`|검색할 수 있는 필드 지정|
+|`list_display_links`|상세 수정 페이지로 이동하는 링크 필드 지정|
+|`list_filter`|특정 필드 기준으로 필터링|
+|`ordering`|데이터 정렬 기준 지정|
+
+`admin.site.register(Article)` 와 `@admin.register(Article)` 는 모두 Model 등록에 사용 가능
+
+후자는 `ModelAdmin` 설정을 함께 작성할 때 편리
+
+### Django Admin Site와 일반 웹 페이지 차이
+
+|구분|Django Admin Site|일반 웹 페이지|
+|---|---|---|
+|주요 사용자|관리자 및 권한 있는 직원|일반 사용자|
+|목적|내부 데이터 관리|사용자에게 서비스 제공|
+|화면 구현|Django가 기본 제공|개발자가 직접 구현|
+|데이터 처리|ModelAdmin과 ORM 활용|View와 ORM 등 활용|
+|접근 권한|관리자 인증 및 권한 필요|서비스 정책에 따라 설정|
+
+
+<br>
+
+### 실제 Admin Site 사용 예시
+
+#### 1. 로그인 과정 및 메인 화면 
+
+![Admin Site 로그인 중](./images/01%20Admin%20Site.png)
+![Admin Site 메인페이지](./images/02%20Admin%20Site.png)
+- `Article` 모델이 등록되어 있음 확인 가능
+
+<br>
+
+#### 2. Create (데이터 생성)
+
+![Article Create 1](./images/03%20Aritcle%20Create%20.png)
+![Article Create 2](./images/04%20Admin%20Site%20Create.png)
+![Article Create 3](./images/05%20Article%20Create.png)
+![Article Create 4](./images/06%20Article%20Create.png)
+
+<br>
+
+#### 3. Read (데이터 읽기)
+
+![Article Read 1](./images/07%20Article%20Read%20All.png)
+![Article Read 2](./images/08%20Article%20Read%20pk.png)
+
+<br>
+
+#### 4. Update (데이터 수정)
+
+![Article Update 1](./images/09%20Article%20Update.png)
+![Article Update 2](./images/10%20Article%20Update.png)
+
+<br>
+
+#### 5. Delete (데이터 삭제)
+
+![Article Delete 1](./images/11%20Article%20Delete.png)
+![Article Delete 2](./images/12%20Article%20Delete.png)
+![Article Delete 3](./images/13%20Article%20Delete.png)
+
+### 핵심 정리
+
+**Django Admin Site**
+- 정의 : Django에서 기본적으로 제공하는 웹 기반 관리자 인터페이스
+- 목적 : 데이터베이스에 저장된 데이터를 편리하게 관리
+- 핵심 기능 : 데이터 CRUD, 검색, 필터링, 관리자 인증 및 권한 관리
+- 동작 방식 : Django Model과 ORM을 활용해 데이터베이스에 접근
+- 사용 조건 : 관리자 계정 생성 및 관리 대상 Model 등록
+- 설정 파일 : 각 앱의 `admin.py`
+- 접근 경로 : 기본적으로 `/admin/`
+
+Django Admin Site는 Model을 기반으로 데이터 관리 인터페이스를 제공하므로, 개발자가 별도의 관리자 CRUD 페이지를 처음부터 구현하는 수고를 줄여준다.
+
+## 26. Django 데이터베이스 초기화 (Database Reset)
+
+Django 데이터베이스 초기화란 **기존 데이터베이스에 저장된 데이터와 테이블 등을 삭제**하고, **데이터베이스를 처음 생성한 상태로 다시 구성**하는 작업
+
+주로 Django 개발 및 학습 과정에서 데이터베이스 구조가 복잡하게 변경되었거나, 기존 데이터를 모두 삭제하고 처음부터 다시 시작할 때 사용
+
+단, **초기화 범위에 따라** **기존 데이터만 삭제**할 수도 있고, **데이터베이스 전체를 삭제**할 수 있음
+
+### 데이터베이스 초기화 방법
+
+#### 1. 기존 데이터베이스 파일 삭제
+프로젝트의 `db.sqlite3` 파일 삭제
+```bash
+rm db.sqlite3
+```
+![데이터베이스 파일 삭제](./images/DB파일%20삭제.PNG)
+
+`db.sqlite3` 파일을 삭제하면 해당 파일에 저장된 테이블과 데이터가 모두 삭제됨
+
+**삭제 대상에 포함되는 목록**
+
+- 게시글 등 사용자가 생성한 데이터
+- 관리자 계정 및 사용자 정보
+- Django 기본 테이블
+- 마이그레이션 적용 이력 (`django_migrations`)
+
+데이터베이스 파일 삭제는 기존 데이터를 **영구적으로 잃을 수도 있는 작업**이므로, 필요한 데이터가 있다면 반드시 백업
+
+<br>
+
+#### 2. 마이그레이션 재적용
+
+```bash
+python manage.py migrate
+```
+
+![데이터베이스 파일 삭제 후 마이그레이션 재적용](./images/DB%20초기화%20후%20migrate%20.png)
+
+`migrate` 명령어가 **삭제된 데이터를 복구하는 것이 아님**, 마이그레이션 파일을 기반으로 **테이블 구조를 다시 생성하는 것**
+
+데이터 마이그레이션이 포함되어 있다면 해당 마이그레이션에 정의된 데이터는 다시 생성될 수 있음
+
+#### 3. 관리자 계정 재생성
+
+기존 데이터베이스에 저장된 관리자 계정도 삭제되었으므로 다시 생성
+
+```bash
+python manage.py createsuperuser
+```
+
+### 마이그레이션 파일까지 삭제해야 하나?
+
+일반적인 데이터베이스 초기화에서는 **마이그레이션 파일을 삭제할 필요 없음**
+
+**마이그레이션 파일과 데이터베이스는 서로 다른 역할을 수행**
+
+|구분|역할|DB 파일 삭제 시|
+|---|---|---|
+|`db.sqlite3`|실제 테이블과 데이터 저장|삭제됨|
+|`migrations/0001_initial.py`|테이블 생성 및 변경 사항 정의|유지됨|
+|`django_migrations`|적용된 마이그레이션 이력 저장|삭제됨|
+|`models.py`|현재 모델 구조 정의|유지됨|
+
+마이그레이션 파일까지 삭제하는 것은 마이그레이션 이력을 새롭게 구성하는 별도의 작업.
+
+마이그레이션 파일을 임의로 삭제하면 다른 개발 환경과 충돌 가능성 존재
+
+### 데이터만 초기화하는 방법
+
+테이블 구조는 유지하면서 **저장된 데이터만 삭제** 목적
+
+```bash
+python manage.py flush
+```
+
+|구분|`flush`|`db.sqlite3` 삭제 후 `migrate`|
+|---|---|---|
+|기존 데이터|삭제|삭제|
+|테이블 구조|유지|삭제 후 재생성|
+|마이그레이션 이력|유지|삭제 후 재기록|
+|관리자 계정|삭제|삭제|
+|사용 목적|데이터만 초기화|DB 전체 재구성|
+
+### 핵심 정리
+
+**Django 데이터베이스 초기화**
+- 정의 : 기존 데이터베이스의 데이터 또는 구조를 삭제하고 초기 상태로 재구성하는 작업
+- 전체 초기화(SQLite) : `db.sqlite3` 삭제 후 `python mange.py migrate`
+- 데이터만 초기화 : `python manage.py flush`
+- 마이그레이션 파일: 일반적인 DB 초기화에서는 삭제할 필요 없음
+- 주의사항 : 관리자 계정을 포함한 기존 데이터가 삭제되므로 필요시 백업 필수
+
+Django에서 **데이터베이스 초기화**와 **마이그레이션 초기화**는 서로 **다른 개념** 
+
+데이터베이스를 삭제하더라도 마이그레이션 파일이 남아 있다면 `migrate` 를 통해 테이블 구조를 다시 생성할 수 있음
+
+<br>
+
+## 27. SQLite
+
+SQLite 는 별도의 데이터베이스 서버를 설치하거나 실행하지 않고, **하나의 파일에 데이터를 저장하고 관리할 수 있는 관계형 데이터베이스 관리 시스템(RDBMS)**
+
+### SQLite의 주요 특징
+
+|특징|설명|
+|---|---|
+|관계형 데이터베이스|데이터를 테이블(행과 열) 형태로 관리|
+|서버리스(Serverless)|별도의 DB 서버 프로세스 없이 동작|
+|파일 기반|데이터베이스를 하나의 파일에 저장|
+|SQL 지원|SQL을 사용하여 데이터 CRUD 수행|
+|가벼운 구조|설치와 설정이 간단하고 리소스 사용량이 적음|
+|트랜잭션 지원|ACID 특성을 지원하여 데이터 일관성 유지|
+
+- SQLite는 MySQL이나 PostgreSQL과 마찬가지로 관계형 데이터베이스이지만, **데이터베이스가 동작하는 방식에 차이 존재**
+
+### SQLite와 일반적인 DBMS의 차이
+
+![SQLite vs 일반 DBMS](./images/SQLite%20와%20일반%20DBMS.png)
+
+예를 들어 MySQL을 사용하려면 일반적으로 **MySQL 서버를 실행**하고 **Django가 해당 서버에 연결**해야 함
+
+반면 SQLite는 Django 프로세스가 SQLite 라이브러리를 이용하여 **데이터베이스 파일을 직접 읽고 쓸 수 있음**
+
+여기서 **Serveless는 별도의 데이터베이스 서버가 필요 없다는 의미**
+
+### Django에서 SQLite 사용하기
+
+Django 프로젝트 생성 시 `settings.py`에 기본적으로 작성되어 있는 설정
+
+![SQLite 기본 설정](./images/Django%20기본%20SQLite%20설정.png)
+
+|설정|의미|
+|---|---|
+|`DATABASES`|Django에서 사용할 데이터베이스 설정|
+|`default`|기본 데이터베이스 연결 이름|
+|`ENGINE`|사용할 데이터베이스 백엔드|
+|`NAME`|SQLite 데이터베이스 파일 경로|
+
+### Django ORM과 SQLite의 관계
+
+Djang에서는 SQLite를 사용하더라도 **대부분 데이터베이스 작업을 SQL 대신 Python 코드로 처리 가능**
+
+_게시글을 저장하는 상황_
+
+```python
+# articles/models.py
+
+from django.db import models
+
+class Article(models.Model):
+  title = models.CharField(max_length=100)
+  content = models.TextField()
+
+# 게시글 생성:
+Article.obejcts.create(
+  title='첫 번째 게시글',
+  content='SQLite 학습 중'
+)
+```
+
+![SQLite 데이터 생성과정](./images/SQLite%20데이터%20생성%20과정.png)
+
+Django ORM은 데이터베이스에 접근하기 위한 도구이고, SQLite는 실제 데이터를 저장하고 관리하는 DBMS
+
+### SQLite 장단점
+
+|장점|단점|
+|---|---|
+|별도의 DB 서버 설치 불필요|동시 쓰기 작업에 제약이 있음|
+|설정이 간단함|대규모 다중 사용자 서비스에 불리|
+|데이터베이스 파일 관리가 편리함|사용자별 DB 접근 권한 관리 기능이 제한적|
+|개발 및 테스트에 적합|네트워크 기반 DB 서버 기능을 자체 제공하지 않음|
+
+SQLite는 여러 사용자가 동시에 데이터를 읽을 수 있지만, **동시에 데이터를 쓰는 작업**은 기본적으로 **한 번에 하나의 쓰기 트랜잭션만 진행**할 수 있음
+
+따라서 개인 학습, 소규모 애플리케이션, 프로토타입 개발에 적합하고, 동시 쓰기 요청이 많은 웹 서비스에서는 PostgreSQL이나 MySQL 같은 서버형 DBMS를 고려
+
+### 핵심 정리
+
+**SQLite (관계형 데이터베이스 관리 시스템)**
+- 정의 : 별도의 데이터베이스 서버 없이 파일 기반으로 데이터를 저장하고 관리하는 RDBMS
+- 저장 방식 : 일반적으로 하나의 데이터베이스 파일 (`db.sqlite3`)에 테이블과 데이터를 저장
+- 데이터 관리 : SQL을 통한 CRUD 및 트랜잭션 지원
+- Django 연동 : Django의 기본 데이터베이스로 설정되어 있으며 ORM을 통해 접근 가능
+- 장점 : 설치 및 설정이 간단하고 가벼움
+- 한계 : 동시 쓰기 처리에 제약이 있어 높은 동시성이 필요한 서비스에서는 불리
+
+**SQLite와 Django ORM은 서로 다른 역할을 수행.**
+
+SQLite는 실제 데이터를 저장하는 데이터베이스 관리 시스템이고, Django ORM은 Python 코드로 데이터베이스를 조작할 수 있도록 도와주는 기술
+
