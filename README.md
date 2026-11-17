@@ -2991,6 +2991,124 @@ Web Font는 글꼴을 제공하는 기술
 
 <br>
 
+## 31. Media Query
 
+Media Query(미디어 쿼리)는 화면의 크기, 방향, 사용자 환경 등의 **조건에 따라 서로 다른 CSS 스타일을 적용**할 수 있는 **CSS 기능**
 
+Media Query는 **반응형 웹 디자인(Responsive Web Design)을 구현하는 핵심 기술** 중 하나
+
+### Media Query 기본 문법
+
+```css
+@media (조건){
+  선택자 {
+    속성: 값;
+  }
+}
+```
+
+|구성 요소|설명|
+|---|---|
+|`@media`|미디어 쿼리를 선언하는 CSS 규칙|
+|`조건`|CSS 스타일을 적용할 환경 조건|
+|`선택자`|스타일을 적용할 HTML 요소|
+|`속성: 값;`|조건을 만족할 때 적용할 CSS 스타일|
+
+### 예시 
+
+![Media Query css 코드](./images/Media%20Query%20예제%201%20css.png)
+
+![결과](./images/MediaQuery%20예시%2001.gif)
+
+동작 과정
+
+1. 브라우저가 CSS를 읽는다.
+2. 현재 화면 너비가 600px 이하인지 확인
+3. 조건을 맞고하면 `.box` 에 배경 화면을 빨간, 글자 색을 파랑으로 적용
+4. 조건을 만족하지 않으면 기본 스타일인 파랑 배경화면, 빨간 글자 적용
+
+### Media Query 주요 조건
+
+#### 1. `max-width`
+
+화면 너비가 지정한 값 이하일 때 스타일을 적용한다.
+
+- css가 적용될 최대 화면 너비 제시
+- 화면 너비가 600px 이하 => css 적용
+- 화면 너비가 600px 초과 => 해당 규칙 미적용
+
+```css
+@media (max-width: 600px){
+  body{
+    background-color: lightblue;
+  }
+}
+```
+
+#### 2. `min-width`
+
+화면 너비가 지정한 값 이상일 때 스타일을 적용한다.
+
+- css가 적용될 최소 화면 너비 제시
+- 화면 너비가 768px 이상 => css 적용
+- 화면 너비가 768px 미만 => 해당 규칙 적용 안 됨
+
+```css
+@media (min-width: 768px){
+  body{
+    background-color: lightgreen;
+  }
+}
+```
+
+#### 3. 여러 조건 조합
+
+- `and` 를 사용하면 여러 조건을 동시에 만족하 때만 스타일을 적용할 수 있다.
+- 화면 너비가 600px 이상 1024px 이하인 경우에 css 적용 
+
+```css
+@media (min-width: 600px) and (max-width: 1024px){
+  body{
+    background-color: lightyellow;
+  }
+}
+```
+
+### Media Query 조건 주의점
+
+미디어 쿼리의 조건이 여러 개 동시에 만족할 수 있다.
+
+2개 이상의 조건으 만족하는 경우 동일한 우선순위의 CSS 규칙이라면 나중에 작성된 스타일이 적용됨
+
+### Media Query의 다른 활용
+
+|조건|설명|
+|---|---|
+|`min-width`|조건을 만족하는 최소 너비|
+|`max-width`|조건을 만족하는 최대 너비|
+|`min-hegith`|조건을 만족하는 최소 높이|
+|`max-height`|조건을 만족하는 최대 높이|
+|`orientation`|화면의 가로/세로 방향|
+|`prefers-color-scheme`|사용자의 라이트/다크 모드 설정|
+|`prefers-reduced-motion`|사용자의 애니메이션 감소 설정|
+
+#### 다크모드 예시
+
+![Media Query 다크모드 css](./images/Media%20Query%20예제%202%20css.png)
+
+![결과](./images/MediaQuery%20DarkMode.gif)
+
+### 핵심 정리
+
+|구분|내용|
+|---|---|
+|개념|특정 미디어 환경이나 조건에 따라 CSS 스타일을 적용하는 기능|
+|선언|`@media`|
+|주요 목적|반응형 웹 디자인 구현|
+|`max-width`|지정한 너비 이하에서 적용|
+|`min-width`|지정한 너비 이상에서 적용|
+|`and`|여러 조건을 동시에 만족할 때 적용|
+|활용|레이아웃 변경, 글자 크기 조절, 다크 모드 등|
+
+Media Query는 브라우저의 화면 크기나 사용자 환경에 따라 **CSS 스타일을 조건부로 적용**하여, **다양한 환경에 적합한 웹 페이지를 구현**하도록 도와주는 기능
 
