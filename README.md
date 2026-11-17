@@ -3074,11 +3074,25 @@ Media Query는 **반응형 웹 디자인(Responsive Web Design)을 구현하는 
 }
 ```
 
-### Media Query 조건 주의점
+### Media Query 주의점
 
-미디어 쿼리의 조건이 여러 개 동시에 만족할 수 있다.
+1. 화면 너비는 일반적으로 CSS 픽셀 기준
+- `max-width: 600px` 은 실제 기기의 물리적 가로 픽셀이 아니라 일반적으로 브라우저의 뷰포트 너비(CSS 필셀)를 기준으로 판단
 
-2개 이상의 조건으 만족하는 경우 동일한 우선순위의 CSS 규칙이라면 나중에 작성된 스타일이 적용됨
+2. 모바일 웹에서는 `viewport` 설정이 중요
+- HTML의 <code>&lt;head&gt;</code> 에 다음 코드를 작성하는 것이 일반적
+- 모바일 브라우저에서 페이지 너비가 기기 화면 너비에 맞게 설정을 도와줌
+```HTML
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+```
+
+3. 기기 종류만으로 구분하지 않는 것이 좋음
+- 600px, 768px, 1024px 등의 값은 자주 사용되는 예시일 뿐, 반드시 지켜야 하는 표준은 아님
+- 실제 콘텐츠의 레이아웃이 깨지는 지점을 기준으로 조건을 설정하는 것이 좋음
+
+4. 미디어 쿼리의 조건이 여러 개 동시에 만족할 수도 있다
+- 특정 요소가 여러 개의 조건을 모두 만족하는 경우. 동일한 우선순위의 CSS 규칙이라면 나중에 작성된 스타일이 적용됨
+
 
 ### Media Query의 다른 활용
 
@@ -3097,6 +3111,7 @@ Media Query는 **반응형 웹 디자인(Responsive Web Design)을 구현하는 
 ![Media Query 다크모드 css](./images/Media%20Query%20예제%202%20css.png)
 
 ![결과](./images/MediaQuery%20DarkMode.gif)
+
 
 ### 핵심 정리
 
