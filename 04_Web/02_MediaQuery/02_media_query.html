@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    .body{
+      background-color:white;
+      color:black;
+    }
+    @media (prefers-color-scheme: dark){
+      body.dark{
+        background-color:black;
+        color: white;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>다크 모드 예시</h1>
+  <button>전환</button>
+
+  <script>
+    const bodyTag = document.querySelector('body')
+    const btn = document.querySelector('button')
+
+    const changeMode = function(){
+      bodyTag.classList.toggle('dark')
+    }
+    
+    btn.addEventListener('click', changeMode)
+
+  </script>
+</body>
+</html>

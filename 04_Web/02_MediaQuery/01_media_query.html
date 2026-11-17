@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <style>
+    /* 기본 스타일 */
+    .box{
+      background-color: blue;
+      color: red
+    }
+
+    /* 화면 너비가 600px 이하일 때 적용될 스타일 */
+    @media (max-width: 600px){
+      .box{
+        background-color: red;
+        color: blue;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h1>Media Query 예제 1번</h1>
+  </div>
+</body>
+</html>

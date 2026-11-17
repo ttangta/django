@@ -2991,5 +2991,6 @@ Web Font는 글꼴을 제공하는 기술
 
 <br>
 
-## 31. CSS Media Query (미디어 쿼리)
+
+
 
