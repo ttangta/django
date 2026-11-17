@@ -3074,26 +3074,6 @@ Media Query는 **반응형 웹 디자인(Responsive Web Design)을 구현하는 
 }
 ```
 
-### Media Query 주의점
-
-1. 화면 너비는 일반적으로 CSS 픽셀 기준
-- `max-width: 600px` 은 실제 기기의 물리적 가로 픽셀이 아니라 일반적으로 브라우저의 뷰포트 너비(CSS 필셀)를 기준으로 판단
-
-2. 모바일 웹에서는 `viewport` 설정이 중요
-- HTML의 <code>&lt;head&gt;</code> 에 다음 코드를 작성하는 것이 일반적
-- 모바일 브라우저에서 페이지 너비가 기기 화면 너비에 맞게 설정을 도와줌
-```HTML
-<meta name='viewport' content='width=device-width, initial-scale=1.0'>
-```
-
-3. 기기 종류만으로 구분하지 않는 것이 좋음
-- 600px, 768px, 1024px 등의 값은 자주 사용되는 예시일 뿐, 반드시 지켜야 하는 표준은 아님
-- 실제 콘텐츠의 레이아웃이 깨지는 지점을 기준으로 조건을 설정하는 것이 좋음
-
-4. 미디어 쿼리의 조건이 여러 개 동시에 만족할 수도 있다
-- 특정 요소가 여러 개의 조건을 모두 만족하는 경우. 동일한 우선순위의 CSS 규칙이라면 나중에 작성된 스타일이 적용됨
-
-
 ### Media Query의 다른 활용
 
 |조건|설명|
@@ -3112,6 +3092,49 @@ Media Query는 **반응형 웹 디자인(Responsive Web Design)을 구현하는 
 
 ![결과](./images/MediaQuery%20DarkMode.gif)
 
+### Media Query 사용 시 주의사항
+
+#### 1. Viewport 설정
+모바일 환경에서 Media Query가 의도한 대로 동작하도록 HTML의 <code>&lt;head&gt;</code> 에 Viewport 설정을 추가하는 것이 중요
+
+```HTML
+<meta name='viewport' content='width=device-width, initial-scale=1.0'>
+```
+- `width=device-width`: Viewport 너비를 기기의 화면 너비에 맞게 설정
+- `initial-scale=1.0`: 페이지의 초기 확대 비율을 100%로 설정
+
+#### 2. CSS 우선순위 및 작성 순서
+여러 Media Query 조건을 동시에 만족하면 CSS 우선순위와 작성 순서에 따라 최종 스타일이 결정된다.
+```css
+@media (max-width: 1024px){
+  body{
+    background-color: blue;
+  }
+}
+
+@media (max-width: 768px){
+  body{
+    background-color: red;
+  }
+}
+```
+**화면 너비가 600px인 경우**
+- `max-width: 1024px` 조건 만족
+- `max-width: 768px` 조건 만족
+- 두 규칙의 우선순위가 같으므로 나중에 작성된 `red` 적용
+
+주의 : Media Query는 조건이 만족된다고 해서 기존 CSS를 무조건 덮어쓰는 것이 아님. CSS의 명시도(Specificity)와 작성 순서도 영향을 줌
+
+#### 3. Breakpoint(중단점) 설정
+Breakpoint는 Media Query에서 레이아웃을 변경하는 기준 너비 의미
+
+|구분|예시 너비|
+|---|---|
+|모바일|767px 이하|
+|태블릿|768px ~ 1023px|
+|데스크톱|1024px 이상|
+
+<br>
 
 ### 핵심 정리
 
