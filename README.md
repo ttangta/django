@@ -3150,3 +3150,562 @@ Breakpoint는 Media Query에서 레이아웃을 변경하는 기준 너비 의�
 
 Media Query는 브라우저의 화면 크기나 사용자 환경에 따라 **CSS 스타일을 조건부로 적용**하여, **다양한 환경에 적합한 웹 페이지를 구현**하도록 도와주는 기능
 
+<br>
+
+## 32. Django ORM
+
+**ORM(Object-Relational Mapping)의 약어**로 객체 지향 프로그래밍 언어의 **객체(Object)와** 관계형 데이터베이스(Relational Database)의 **테이블을 연결**해 주는 기술
+
+```sql
+SELECT *
+FROM articles;
+```
+```python
+Article.objects.all()
+```
+
+즉, **ORM**은 **Python 코드와 관계형 데이터베이스 사이에서 데이터를 연결하고 변환**하는 역할 수행
+
+### Django ORM의 동작 원리
+
+**Django ORM을 사용**하면 **Python 코드가 데이터베이스에 전달되 SQL로 변환**
+
+![Django ORM 동작원리](./images/Django%20ORM%20동작원리.png)
+
+1. 개발자가 Django ORM을 사용해 Python 코드 작성
+2. Django ORM이 해당 작업에 필요한 SQL 생성
+3. 생성된 SQL이 데이터베이스에 전달되어 실행
+4. 데이터베이스 실행 결과를 반환
+5. Django ORM이 결과를 Python 객체 또는 QuerySet 형태로 제공
+
+단, `Article.objctes.all()` 처럼 QuerySet을 생성하는 코드에서는 SQL이 즉시 실행되지 않을 수 있음. 
+
+Django의 QuerySet은 기본적으로 **지연 평가(Lazy Evaluation)** 방식으로 동작
+
+<br>
+
+### Django ORM과 Model의 관계
+
+Django ORM은 **Model 클래스**를 기반으로 데이터베이스 조작
+
+```python
+# articles/models.py
+
+from django.db import models
+
+class Article(models.Model):
+  title = models.CharField(max_length=100)
+  content = models.TextField()
+```
+
+해당 모델에 대응하는 데이터베이스 테이블 
+|id|title|content|
+|---|---|---|
+|1|Django 공부|ORM 학습 중|
+|2|Python 공부|Python 복습|
+|3|DB 공부|SQLite 학습|
+
+Django ORM은 Model 클래스의 정보를 활용하여 데이터베이스 테이블에 접근
+|Django|데이터베이스|
+|---|---|
+|Model 클래스|테이블(Table)|
+|Model 필드|열or속성(Column)|
+|Model 인스턴스|행or레코드(Row=Record)|
+|필드 값|데이터 값|
+
+- `Article` 모델을 통해 조회한 게시글 하나는 Python의 `Article 인스턴스`로 표현 가능
+
+<br>
+
+### Django ORM의 기본 CRUD
+CRUD는 데이터를 생성(Create), 조회(Read), 수정(Update), 삭제(Delete)하는 네 가지 기본 작업
+
+#### 1. Create -- 데이터 생성
+
+```python
+Article.objects.create(
+    title='Django 공부',
+    content='ORM 학습 중'
+)
+```
+```sql
+INSERT INTO articles_article(title, content)
+VALUES ('Django 공부', 'ORM 학습 중');
+```
+
+#### 2. Read -- 데이터 조회
+
+```python
+# 전체 게시글 조회
+Article.objects.all()
+
+# 특정 게시글 조회
+Article.objects.get(pk=1)
+
+# 조건에 맞는 게시글 조회
+Article.objects.filter(title='Django 공부')
+```
+```sql
+SELECT * FROM articles_article;
+
+SELECT * FROM articles_article WHERE id = 1;
+
+SELECT * FROM articles_article 
+WHERE title = 'Django 공부';
+```
+
+#### 3. Update -- 데이터 수정
+
+```python
+article = Article.objects.get(pk=1)
+
+article.title = 'Django ORM 공부'
+article.save()
+```
+- 기존 게시글의 `title` 값을 수정하고 `save()`를 호출하여 데이터베이스에 반영
+
+#### 4. Delete -- 데이터 삭제
+
+```python
+article = Article.objects.get(pk=1)
+
+article.delete()
+```
+- 해당 게시글을 데이터베이스에서 삭제
+
+<br>
+
+### Manager와 QuerySet
+
+![Manager와 QuerySet](./images/ORM%20manager%20QuerySet.png)
+
+|구분|설명|
+|---|---|
+|Model|데이터베이스 테이블의 구조를 정의하는 클래스|
+|Manager|Model에 대한 데이터베이스 작업을 시작하는 인터페이스|
+|QuerySet|데이터베이스 조회 조건과 결과를 표현하는 객체|
+
+<br>
+
+### Django ORM의 장점과 주의사항
+
+|장점|설명|
+|---|---|
+|생산성|SQL을 직접 작성하지 않아도 CRUD 구현 가능|
+|가독성|Python 문법을 사용하여 데이터베이스 조작|
+|유지보수|Model 중심으로 데이터베이스 작업 관리|
+|DB 호환성|SQLite, PostgreSQL, MySQL 등 여러 DB 지원|
+|보안|일반적인 ORM 조회는 SQL 파라미터 처리를 통해 SQL Injection 위험 감소|
+
+다만 **ORM이 모든 SQL을 자동으로 최적화해 주는 것이 아님**, 
+
+**잘못 사용 시** 불필요한 쿼리가 반복되는 **N+1 문제 등 발생.**
+
+복잡한 조회에서는 실제 실행되는 SQL을 확인하는 것이 중요
+
+<br>
+
+### 핵심 정리
+
+**Django ORM(Object-Relational Mapping)**
+- 장점 : Python 객체와 관계형 데이터베이스 테이블을 연결하는 기술
+- 목적 : SQL을 직접 작성하지 않고 Python 코드로 데이터베이스를 조작하기 위함
+- 동작 : Python ORM 코드 -> SQL 생성 및 실행 -> DB 결과 -> Python 객체 또는 QuerySet
+- 핵심 구성 : Model, Manager. QuerySet
+- 특징 : QuerySet은 기본적으로 지연 평가 방식으로 동작
+
+**Django ORM**이 데이터베이스를 대체하는 기술이 아니라, **Python 코드로 데이터베이스를 편리하게 조작하도록 도와주는 기술**
+
+<br>
+
+## 33. Django QuerySet API
+
+**QuerySet API**는 **Django ORM에서 데이터베이스의 데이터를 조회, 생성, 수정, 삭제하기 위해 제공하는 메서드와 기능들의 집합**
+
+개발자는 **QuerySet API를 사용**하여 SQL을 직접 작성하지 않고 **Python 코드로 데이터베이스를 조작**할 수 있음
+
+- **ORM** : Python 객체와 관계형 데이터베이스를 연결하는 **기술**
+- **QuerySet** : 데이터베이스 조회 조건과 결과 집합을 표현하는 **객체**
+- **QuerySet API** : QuerySet을 생성하고 조작하는 데 사용하는 **메서드와 기능**
+
+엄밀히 말하면 QuerySet API는 주로 조회 작업
+
+Django ORM의 Manager가 Model 인스턴스가 제공하는 메서드까지 함께 사용하여 CRUD 수행
+
+<br>
+
+### QuerySet API 기본 구조
+
+![QuerySet API 기본 구조](./images/QuerySet%20API%20기본%20구조.png)
+- Article (모델 클래스)
+  - 역할 : 데이터베이스 테이블에 대한 Python 클래스 표현
+  - articles_article 테이블의 스키마를 정의하며, Django ORM이 데이터베이스와 상호작용할 때 사용하는 기본적인 구조체
+
+- objects (Manager)
+  - 역할 : 데이터베이스 질의 작업을 위한 기본 인터페이스
+  - 모델 클래스가 데이터베이스 쿼리 작업을 수행할 수 있도록 하는 진입점
+  - Django는 모든 모델에 objects 라는 이름의 매니저를 자동 추가
+
+- `.all()` (QuerySet API 메서드)
+  - 역할 : 특정 데이터베이스 작업을 수행하는 명령
+  - 매니저를 통해 호출되는 메서드로, 해당 모델과 연결된 테이블의 모든 레코드를 조회하라는 SQL 쿼리를 생성하고 실행
+
+<br>
+
+### QuerySet API의 주요 메서드
+
+```python
+# articles/models.py
+
+from django.db import models
+
+class Article(models.Model):
+  title = models.CharField(max_length=100)
+  content = models.TextField()
+```
+
+#### 1. `all()` -- 전체 데이터 조회
+```python
+articles = Article.objects.all()
+```
+- 모든 게시글을 대상으로 하는 QuerySet 반환
+- 반환된 QuerySet에는 여러 개의 Article 객체가 포함될 수 있음
+- 실제 SQL 실행은 QuerySet이 평가되는 시점까지 지연될 수 있음
+
+#### 2. `get()` -- 단일 데이터 조회
+```python
+article = Article.objects.get(pk=1)
+```
+- 조건에 일치하는 데이터 하나를 조회
+- 반환값은 `Article` 모델 인스턴스
+- 일치하는 데이터가 없으면 `DoesNotExist` 예외 발생
+- 일치하는 데이터가 여러 개면 `MultipleOjbectsReturned` 예외 발생
+
+#### 3. `filter()` -- 조건에 맞는 데이터 조회
+```python
+articles = Article.objects.filter(title='Django 공부')
+```
+- 조건에 일치하는 데이터를 조회하기 위한 QuerySet을 반환
+- 조건에 일치하는 데이터가 없어도 예외가 발생하지 않으며, 평가 결과는 빈 QuerySet
+
+#### 4. `exclued()` -- 특정 조건을 제외한 데이터 조회
+```python
+articless = Article.objects.exclued(pk=1)
+```
+- `pk=1` 인 게시글을 제외한 나머지 게시글 조회
+
+#### 5. `order_by()` -- 데이터 정렬
+```python
+# 1. id 오름차순
+Article.objects.order_by('id')
+
+# 2. id 내림차순
+Article.objects.order_by('-id')
+```
+
+#### 6. `count()` -- 데이터 개수 조회
+```python
+count = Article.objects.count()
+```
+- 조회 조건에 일치하는 데이터 개수를 정수로 반환
+
+#### 7. `first()` / `last()` -- 첫 번째, 마지막 데이터 조회
+```python
+Article.objects.order_by('id').first()
+
+Article.objects.order_by('id').last()
+```
+- 첫 번째 또는 마지막 모델 인스턴스를 반환. 데이가 없으면 `None` 반환
+- 정렬 기준을 명시하면 어떤 데이터가 선택되는지 더욱 명확하게 알 수 있음
+
+<br>
+
+### QuerySet API 반환값 차이
+
+|메서드|반환값|
+|---|---|
+|`all()`|QuerySet|
+|`filter()`|QuerySet|
+|`exclued()`|QuerySet|
+|`order_by()`|QuerySet|
+|`get()`|Model 인스턴스|
+|`first()`|Model 인스턴스 또는 `None`|
+|`last()`|Model 인스턴스 또는 `None`|
+|`count()`|int|
+|`exists()`|bool|
+
+<br>
+
+### Field Lookup -- 세부 조회 조건
+QuerySet API에서는 **Field Lookup**을 사용하여 다양한 **조회 조건을 지정** 가능
+
+```python
+# 기본 구조
+Article.objects.filter(필드명__조건=값)
+```
+
+|Filed Lookup|설명|예시|
+|---|---|---|
+|`exact`|정확히 일치|`title__exact='Django 공부'`|
+|`iexact`|대소문자 구분 없는 일치|`title__iexact='django'`|
+|`contains`|특정 문자열 포함|`title__contains='Django'`|
+|`icontains`|대소문자 구분 없는 포함|`title__icontains='django'`|
+|`gt`|초과|`id__gt=2`|
+|`gte`|이상|`id__gte=2`|
+|`lt`|미만|`id__gt=3`|
+|`lte`|이하|`id__lte=3`|
+|`in`|지정된 값 중 하나|`id__in=[1,2,3]`|
+|`startswith`|특정 문자열로 시작|`title__startswith='Django'`|
+
+<br>
+
+### QuerySet의 특징 -- Lazy Evaluation
+**Lazy Evaluation은 지연 평가** 이는 QuerySet의 특징 중 하나
+
+**지연 평가**란 QuerySet을 생성하는 **즉시 SQL을 실행하는 것이 아니라, 실제 데이터가 필요한 시점에 SQL을 실행**하는 방식
+
+```python
+# 1. QuerySet 생성
+articles = Article.objects.filter(
+  title__contains='Django'
+)
+
+# 2. QuerySet 평가
+for article in articles:
+  print(article.title)
+```
+
+![QuerySet Lazy Evaluation](./images/QuerySet의%20Lazy%20Evaluation.png)
+
+<br>
+
+### QuerySet API 메서드 체이닝
+
+QuerySet을 반환하는 메서드는 여러 개를 연결해서 사용할 수 있음
+```python
+articles = (
+  Articles.objects
+  .filter(title__contains='Django')
+  .exclude(pk=1)
+  .order_by('-id')
+)
+```
+1. 제목에 `Django`가 포함된 게시글 선택
+2. `pk=1`인 게실글은 제외
+3. 남은 게시글을 `id` 내림차순으로 정렬
+
+이처럼 **QuerySet을 반환하는 메서드들을 연결**하는 것을 **메서드 체이닝(Method Chaining)** 이라고 함
+
+### 핵심 정리
+**QuerySet API**
+- 정의 : Django ORM에서 QuerySet을 생성하고 조작하여 데이터베이스를 조회하는 데 사용하는 API
+- 기본 구조 : `Model.objects.method()`
+- Manager : 데이터베이스 작업의 진입점
+- QuerySet : 데이터베이스 조회 조건과 결과 집합을 표현한는 객체
+- Field Lookup : 필드에 대한 세부 조회 조건을 지정하는 기능
+  - `filter()` 메서드 보다 유연한 조건 지정
+- Lazy Evaluation : QuerySet이 실제로 평가되는 시점에 SQL 실행
+- Method Chaining : 여러 QuerySet 메서드를 연결하여 조회 조건 구성
+
+QuerySet은 조회 조건과 결과 집합을 표현하는 객체이고, QuerySet API는 이러한 객체를 생성하고 조작하기 위한 메서드와 기능
+
+<br>
+
+## 34. Django ORM을 활용한 CRUD
+
+#### CRUD?
+CRUD는 **데이터베이스에서 데이터를 관리하기 위한 4가지 기본 작업** 의미
+
+Django에서는 **ORM을 활용**하여 SQL을 직접 작성하지 않고 **Python 코드로 CRUD 작업을 수행**
+
+|구분|의미|SQL 명령어|Django ORM|
+|---|---|---|---|
+|Create|데이터 생성|INSERT|`create()`, `save()`|
+|Read|데이터 조회|SELECT|`all()`, `get()`, `filter()`| 
+|Update|데이터 수정|UPDATE|`save()`, `update()`|
+|Delete|데이터 삭제|DELETE|`delete()`|
+
+<br>
+
+#### Create -- 데이터 생성
+데이터베이스에 새로운 데이터를 저장하는 작업
+
+Django ORM에서는 대표적으로 두 가지 방법 사용
+
+**1. `save()` 메서드**
+
+```python
+# 1. 모델 인스턴스 생성
+article = Article(
+    title='첫 번째 게시글',
+    content='Django ORM 학습'
+)
+
+# 2. 데이터베이스에 저장
+article.save()
+```
+- [save() 동작 과정](./images/ORM%20Create%20save()%20동작%20과정.png)
+- `save()` 는 저장 후 `None`을 반환하지만, 지정된 모델 인스턴스에는 생성된 PK가 반영됨
+
+<br>
+
+**2. `create()` 메서드**
+```python
+article = Article.objects.create(
+  title='두 번째 게시글',
+  content='QuerySet API 학습'
+)
+```
+- `create()` 는 모델 인스턴스 생성과 데이터베이스 저장을 한 번에 수행
+- 저장된 모델 인스턴스 반환
+
+|구분|`save()`|`create()`|
+|---|---|---|
+|인스턴스 생성|별도 생성|내부에서 생성|
+|데이터베이스 저장|`save()` 호출|즉시 저장|
+|반환값|`None`|모델 인스턴스|
+|주요 특징|생성과 수정 모두 가능|새로운 데이터 생성|
+
+![ORM Create 작업 실습](./images/ORM%20Create%20작업.jpg)
+
+<br>
+<br>
+
+#### Read -- 데이터 조회
+데이터베이스에 저장된 데이터를 조회하는 작업
+
+**1. `all()`**
+
+전체 조회 : 데이터베이스에 존재하는 모든 데이터를 QuerySet 으로 반환
+```python
+articles = Article.objects.all()
+
+# 지연 평가
+for article in articles:
+  print(article.title)
+```
+<br>
+
+**2. `get()`**
+
+단일 객체 조회 : 조건에 해당하는 모델 인스턴스 하나를 반환
+- 조회 결과가 없으면 `DoesNotExist` 예외 발생
+- 조회 결과가 여러 개면 `MultipleObjectReturned` 예외 발생
+```python
+article = Article.objects.get(pk=1)
+```
+<br>
+
+**3. `filter()`**
+
+조회에 일치하는 데이터를 조회하기 위한 QuerySet 반환
+
+조회 결과가 없어도 예외가 발생하지 않고 빈 QuerySet 반환
+```python
+articles = Article.objects.filter(title='QuerySet API save')
+```
+
+<br>
+
+**4. Field Lookup**
+
+상세 조건 조회
+```python
+articles = Article.objects.filter(title__contains='QuerySet API')
+```
+- 제목에 `QuerySet API` 라는 문자열이 포함된 게시글을 조회
+
+![ORM Read 작업 실습](./images/ORM%20Read%20작업.jpeg)
+
+<br>
+
+#### Update -- 데이터 수정
+
+기존에 저장된 데이터를 수정하는 작업
+
+**1. `save()` 메서드**
+
+```python
+# 1. 수정할 객체 조회
+article = Article.objects.get(pk=1)
+
+# 2. 필드값 변경
+article.title='수정된 게시글'
+
+# 3. 데이터베이스에 반영
+article.save()
+```
+- `save()` 는 **이미 저장된 모델 인스턴스의 변경** 내용을 데이터베이스에 반영
+- **중요** : Python 객체의 필드값을 변경하는 것만으로 데이터베이스에 반영되지 않음
+
+<br>
+
+**2. `update()` 메서드**
+
+```python
+Article.objects.filter(pk=1).update(
+  title='수정된 게시글'
+)
+```
+- 조건에 일치하는 데이터의 필드값을 **데이터베이스에서 직접 수정**
+- `update()`는 **수정 대상 행의 개수를 반환.** 값이 실제로 달라진 행의 개수와는 다를 수 있음
+
+|구분|`save()`|`update()`|
+|---|---|---|
+|사용 대상|모델 인스턴스|QuerySet|
+|객체 조회|일반적으로 필요|별도 조회 불필요|
+|반환값|`None`|수정 대상 행 개수|
+|`save()` 호출|실행|실행하지 않음|
+|`auto_now` 자동 갱신|적용|적용되지 않음|
+|`save()` 관련 시그널|발생|발생하지 않음|
+
+![ORM Update 작업 실습](./images/ORM%20Update%20작업%20실습.jpeg)
+
+<br>
+
+#### Delete -- 데이터 삭제
+
+데이터베이스에 저장된 데이터를 삭제하는 작업
+
+**1. 모델 인스턴스 `delete()`**
+
+```python
+# 1. 삭제할 객체 조회
+article = Article.objects.get(pk=1)
+
+# 2. 데이터 삭제
+article.delete()
+```
+- 해당 모델 인스턴스에 대응하는 데이터를 삭제
+
+<br>
+
+**2. QuerySet의 `delete()`**
+
+```python
+Article.objects.filter(title='삭제할 게시글').delete()
+
+Article.objects.get().delete()
+```
+- 조건에 해당하는 데이터를 한 번에 삭제
+- 전체 삭제도 가능
+
+**`delete()` 반환값**
+
+```python
+(1, {'articles.Article': 1'})
+```
+- `1` : 삭제된 전체 객체 수
+- `{'articles.Article': 1}` : 모델별 삭제된 객체 수
+- 연관 객체가 함께 삭제되는 경우 전체 삭제 수 증가 가능성 존재
+
+#### [CRUD 전체 데이터 흐름](./images/ORM%20CRUD%20동작.png) 
+
+#### 주의점
+Django ORM의 CRUD 메서드는 데이터베이스 작업을 수행하지만, 모든 메서드가 자동으로 모델 필드의 유효성 검사를 실행하느 것이 아님
+
+예를 들어 `save()`, `create()`, `update()` 는 기본적으로 `full_clean()` 을 자동을 호출하지 않음
+
+따라서 데이터베이스 제약조건과 Django의 유효성 검사는 구분해서 이해해야 함
+
+특히 `update()` 는 모델 인스턴스의 `save()` 과정을 생략하고 SQL UPDATE 를 직접 수행
