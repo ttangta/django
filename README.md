@@ -4100,3 +4100,7 @@ def detail(request, pk):
 `articles/templates/articles` 내부 템플릿
 
 [index.html](./images/articles_index.png) &nbsp; | &nbsp; [detail.html](./images/articles_detail.png)
+
+#### HTTP 요청 결과
+
+[전체 조회 결과](./images/articles )
