@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block head%}
+  <title>전체글 조회</title>
+{% endblock head %}
+{% block content %}
+  {% for article in articles %}
+    <div>
+      <p>글 번호 : {{article.pk}}</p>
+      <p>글 제목 : {{article.title}}</p>
+      <p>글 내용 : {{article.content}}</p>
+    </div>
+    <br>
+    <hr>
+  {% endfor %}
+{% endblock content %}

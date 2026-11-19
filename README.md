@@ -3702,10 +3702,247 @@ Article.objects.get().delete()
 #### [CRUD 전체 데이터 흐름](./images/ORM%20CRUD%20동작.png) 
 
 #### 주의점
-Django ORM의 CRUD 메서드는 데이터베이스 작업을 수행하지만, 모든 메서드가 자동으로 모델 필드의 유효성 검사를 실행하느 것이 아님
+Django ORM의 CRUD 메서드는 데이터베이스 작업을 수행하지만, 모든 메서드가 자동으로 모델 필드의 유효성 검사를 실행하는 것이 아님
 
 예를 들어 `save()`, `create()`, `update()` 는 기본적으로 `full_clean()` 을 자동을 호출하지 않음
 
 따라서 데이터베이스 제약조건과 Django의 유효성 검사는 구분해서 이해해야 함
 
 특히 `update()` 는 모델 인스턴스의 `save()` 과정을 생략하고 SQL UPDATE 를 직접 수행
+
+<br>
+<br>
+
+## 35. 필드 제약조건 vs 유효성 검사 vs DB 제약조건
+
+### 1. 필드 제약조건 (Field Constraints)
+필드 제약조건이란 **Django 모델의 필드에 저장할 데이터가 만족해야 하는 규칙이나 제약 사항을 정의**하는 것
+
+```python
+from django.db import models
+
+class User(models.Model):
+  email = models.EmailField(
+    unique=True,
+    null=False,
+    blank=False
+  )
+  age = models.PositiveIntegerField()
+```
+
+**필드에 정의한 규칙**
+
+|필드 설정|의미|
+|---|---|
+|`EmailField()`|이메일 형식을 검증할 수 있는 필드|
+|`unique=True`|중복된 값 허용하지 않음|
+|`null=False`|DB에 NULL 값 저장 불가|
+|`blank=False`|Django 유효성 검사에서 빈 값 허용하지 않음|
+|`PositiveIntegerField()`|음수가 아닌 정수 값 사용
+
+모델 필드에 **정의한 모든 규칙이 DB 제약조건으로 만들어지는 것이 아님**
+
+예를 들어 `blank=False` 는 Django 유효성 검사에 사용되는 설정이지만, DB의 `NOT NULL` 제약조건으로 만들어지지 않음
+
+반면 `unique=True` 는 Django 유효성 검사에서도 활용되고 DB의 `UNIQUE` 제약 조건으로도 반영됨
+
+즉. **필드 제약조건**이라는 표현은 **모델 필드에 정의한 여러 규칙**을 포괄적으로 의미
+
+### 2. 유효성 검사 (Validation)
+유효성 검사란 **데이터가 모델에 정의된 규칙을 만족하는지 Django 애플리케이션에서 검사**하는 과정
+```python
+user = User(
+  email = 'hello',
+  age = -5
+)
+
+user.full_clean()
+```
+`full_clean()` 을 실행하면 Django는 다음을 검사
+- `email='hello'` : 이메일 형식이 올바른가
+- `age=-5` : 음수가 아닌 정수인가
+- `unique=True` : 이미 존재하는 이메일인가
+
+검사 실패 시 `ValidationError` 발생
+
+중요한 점은 **필드에 규칙을 정의하는 것**과 **실제로 유효성 검사를 실행하는 것**은 **별개의 과정**
+```python 
+user = User(email='hello', age=-5)
+user.save()
+```
+`save()` 는 `full_clean()`을 자동으로 실행하지 않음
+
+따라서 Django 유효성 검사를 통과하지 않은 데이터도 DB 제약조건에 위배되지 않는다면 저장될 수 있음
+
+### 3. DB 제약조건 (Database Constraints)
+**DB 제약조건**이란 **데이터베이스 자체**에서 데이터의 무결성을 보장하기 위해 강제하는 **규칙**
+
+Django에서는 모델에 정의한 일부 필드 설정이 마이그레이션을 통해 실제 DB 스키마에 반영
+```python
+class User(models.Model):
+  email = models.EmailField(
+    unique=True,
+    null=False
+  )
+```
+
+마이그레이션을 적용하면 DB에는 일반적으로 다음과 같은 규칙 생성됨
+
+|DB 제약조건|의미|
+|---|---|
+|`NOT NULL`|`NULL` 저장 불가|
+|`UNIQUE`|중복 저장 불가|
+|`CHECK`|지정된 조건을 만족해야 함|
+|`FOREIGN KEY`|참조 무결성 보장|
+
+DB 제약조건의 가장 큰 특징은 **Django ORM** 을 사용하지 않고 **SQL**로 직접 데이터를 수정하더라도 적용됨
+
+### 세 가지 개념의 관계
+![모델 필드 제약조건 | 유호성 검사 | DB 제약조건](./images/모델%20필드%20제약조건,%20유효성%20검사,%20DB%20제약조건%20.png)
+
+|구분|필드 제약조건|유효성 검사|DB 제약조건|
+|---|---|---|---|
+|핵심 역할|규칙 정의|규칙 검사|규칙 강제|
+|위치|Django Model|Django 애플리케이션|데이터베이스|
+|목적|허용할 데이터 조건 설정|잘못된 데이터 사전 검출|데이터 무결성 보장|
+|적용 시점|모델 정의 시|검증 실행 시|DB 저장/수정 시|
+|대표 예시|`blank`, `unique`, `null`|`full_clean()`|`UNIQUE`, `NOT NULL`|
+|SQL 직접 수정 시|설정 자체는 실행되지 않음|적용 안됨|적용됨|
+
+### 핵심 정리
+
+#### 1. 필드 제약조건 (Field Constraints)
+- Django Model Field에 데이터의 규칙 및 제한 사항을 정의
+- 일부 규칙은 Django 유효성 검사에 활용
+- 일부 규칙은 마이그레이션을 통해 DB 제약조건으로 반영
+- 대표 설정 : `unique`, `null`, `blank`, `max_length`
+
+#### 2. 유효성 검사 (Validation)
+- Django 애플리케이션에서 데이터가 규칙을 만족하는지 검사하는 과정
+- `full_clean()`, `ModelForm` 등을 통해 수행
+- 실패 시 `ValidationError` 발생
+- `save()`, `create()` 는 모델 유효성 검사를 자동 실행하지 않음
+
+#### 3. DB 제약조건 (Database Constraints)
+- 데이터베이스 스카마에 정의되어 데이터 무결성을 강제하는 규칙
+- 마이그레이션을 통해 생성하거나 SQL로 직접 정의 가능
+- Django ORM을 거치지 않아도 적용
+- 대표 제약조건 : `NOT NULL`, `UNIQUE`, `CHECK`, `FOREIGN KEY`
+
+#### 핵심 결론
+- 필드 제약조건 : 어떤 데이터가 허용되는지 규칙 정의
+- 유효성 검사 : Django에서 데이터가 규칙을 만족하는지 확인
+- DB 제약조건 : DB에서 반드시 지켜야 할 규칙 강제
+
+<br>
+<br>
+
+## 36. ORM with view
+Django의 View 함수에서 ORM을 활용하여 데이터베이스의 데이터를 생성(Create), 조회(Read), 수정(Update), 삭제(Delete)하는 방식
+
+즉, 실제 웹 요청을 처리하는 **View에서 QuerySet API 작업**
+
+### 1. articles 앱 생성 및 프로젝트 `settings.py` 파일에 생성한 앱 등록
+```bash
+# 앱 생성 명령어
+python manage.py startapp articles
+```
+![articles 앱등록](./images/01_생성된%20articles%20앱%20등록.png)
+<br>
+
+### 2. articles 앱에 `ulrs.py` 파일 생성
+```python
+# articles/urls.py
+from django.urls import path
+from .import views
+
+app_name='articles'
+
+urlpatterns = [
+  path('', views.index, name='index'),
+]
+```
+- app_name 지정 및 URL 라우팅
+
+
+### 3. URL 라우팅 설정
+```python
+# 프로젝트/urls.py
+from django.contrib import admin
+from django.urls import path, include
+
+urlpatterns = [
+  path('admin/', admin.site.urls),
+  path('articles/', include('articles.urls')),
+]
+```
+- `/articles/` 로 시작하는 요청을 `articles/urls.py`에 전달
+- `include()` 를 통해 앱별 URL 설정을 분리하여 관리
+
+### 4. articles 앱 모델 클래스 작성
+```python
+# articles/models.py
+from django.db import models
+
+class Article(models.Model):
+  title = models.CharField(max_length=10)
+  content = models.TextField()
+  created_at = models.DateTimeField(auto_now_add=True)
+  updated_at = models.DateTimeField(auto_now=True)
+```
+
+### 5. Migrations
+```bash
+python manage.py makemigrations # 마이그레이션 파일 생성
+python manage.py migrate # 마이그레이션 실행
+```
+
+### 6. article view 함수 작성
+```python
+# article/views.py
+from django.shortcuts import render
+from .models import Article
+
+def index(request):
+  articles = Article.objects.all() # ORM with View : 뷰 함수에서 QuerySet API를 통해 데이터베이스 내 데이터 모두 QuerySet으로 반환
+
+  context = {
+    'articles': articles
+  }
+
+  return render(request, '/articles/index.html', context) # index.html에서 사용할 데이터(context) 전달
+```
+
+### 7. articles/templates/index.html 작성
+[템플릿 상속 사용](./images/02_상위%20템플릿.png)
+```html
+{% extends "base.html"}
+{% block head %}
+  <title>전체글 조회</title>
+{% endblock head %}
+{% block content %}
+  {% for article in articles %}
+    <div>
+      <p>글 번호 : {{ article.pk }}</p>
+      <p>글 제목 : {{ article.title }}</p>
+      <p>글 내용 : {{ article.content }}</p>
+    </div>
+    <br>
+    <hr>
+  {% endfor %}
+{% endblock content %}
+```
+
+### 8. 서버 실행 후 결과 확인
+```bash
+python manage.py runserver
+```
+![ORM with view 결과](./images/ORM%20with%20view%20결과.png)
+
+<br>
+
+### 핵심 정리
+- ORM : Python 코드로 데이터베이스를 조작할 있게 해주는 기술
+- QuerySet API : ORM을 통해 데티터를 조회하거나 조작할 때 사용하는 인터페이스
+- View : HTTP 요청을 받아 필요한 로직을 처리하고 HTTP 응답을 반환하는 함수
+- ORM with View : View 함수에서 ORM을 활용하여 데이터베이스 작업 수행
