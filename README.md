@@ -3946,3 +3946,76 @@ python manage.py runserver
 - QuerySet API : ORM을 통해 데티터를 조회하거나 조작할 때 사용하는 인터페이스
 - View : HTTP 요청을 받아 필요한 로직을 처리하고 HTTP 응답을 반환하는 함수
 - ORM with View : View 함수에서 ORM을 활용하여 데이터베이스 작업 수행
+
+<br>
+<br>
+
+## 37. Django에서 ORM과 QuerySet API를 사용하는 이유
+Django에서 ORM과 QuerySet API를 사용하는 가장 큰 이유는 **SQL을 직접 작성하지 않고도 Python 코드로 데이터베이스를 조작할 수 있기 때문**
+
+하지만 단순히 SQL을 작성하지 않아도 된다는 것 외에도 여러 장점 존재
+
+### 1. ORM을 사용하는 이유
+ORM(Object-Relational Mapping)은 객체 지향 프로그래밍 언어의 **객체**와 관계형 데이터베이스의 **테이블**을 **연결해주는 기술**
+
+<br>
+
+#### SQL을 직접 작성하지 않아도 됨
+SQL을 사용하는 경우:
+```sql
+SELECT * FROM article WHERE id = 1;
+```
+Django ORM을 사용하는 경우:
+```python
+article = Article.obejcts.get(pk=1)
+```
+- ORM을 사용하면 Python 문법으로 데이터베이스 조작 가능
+
+<br>
+
+#### 데이터베이스와 Python 객체를 연결
+ORM은 조회된 데이터베이스의 행을 Python 모델 인스턴스로 변환해 주기 때문에 객체의 속성으로 데이터에 접근 가능
+```python
+article = Article.objects.get(pk=1)
+
+print(article.title)
+print(article.content)
+```
+
+<br>
+
+#### 데이터베이스 변경에 유연함
+Django ORM은 SQLite, PostgreSQL, MySQL 등 다양한 데이터베이스 지원
+
+데이터베이스 제품을 변경하더라도 상당수의 ORM 코드를 그대로 사용할 수 있음. _단, 데이터베이스별 기능이나 SQL 차이로 일부 수정이 필요할 수도 있음_
+
+<br>
+
+#### 유지보수와 생산성 향상
+Python 코드로 데이터베이스 작업을 표현하기 때문에 Django의 모델, View 등과 연결되고 중복 SQL 줄이기 쉬움
+
+<br>
+
+### 2. QuerySet API를 사용하는 이유
+QuerySet API는 **Django ORM을 통해 데이터베이스에 CRUD 작업을 수행할 수 있도록 제공하는 메서드와 기능들의 집합.**
+
+ORM = 객체와 관계형 데이터베이스 연결 기술
+
+QuerySet API = ORM 기술을 편리하게 사용할 수 있도록 제공하는 인터페이스
+
+|QuerySet API|역할|
+|---|---|
+|`create()`|데이터 생성 (모델 인스턴스 생성 + DB 데이터 저장)|
+|`all()`|데이터베이스 내 모든 데이터 조회|
+|`filter()`|조건에 맞는 데이터 조회|
+|`get()`|단일 데이터 조회 (모델 인스턴스 반환)|
+|`update()`|데이터 수정 (데이터베이스 내에서 직접 수행)|
+|`delete()`|데이터 삭제|
+
+### 핵심 정리
+Django에서 ORM을 사용하는 이유는 데이터베이스 작업을 Python 객체 중심으로 처리해 개발 생산성과 유지보수성을 높이기 위함
+
+QuerySet API는 이러한 ORM을 활용하여 CRUD 작업을 쉬복 일관된 방식으로 수행할 수 있도록 해주는 기능
+
+단, ORM이 모든 상황에서 SQL보다 빠르거나 효율적인 것은 아님
+
