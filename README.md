@@ -4103,4 +4103,4 @@ def detail(request, pk):
 
 #### HTTP 요청 결과
 
-[전체 조회 결과](./images/articles )
+**[전체 조회 결과](./images/전체%20조회%20HTTP%20요청%20결과.png)** &nbsp; | &nbsp;**[단일 조회 결과](./images/단일%20조회%20HTTP%20요청%20결과.png)**
