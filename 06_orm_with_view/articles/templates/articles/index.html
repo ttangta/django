@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block head %}
+  <title>index 페이지</title>
+{% endblock head %}
+
+{% block content %}
+  {% for article in articles %}
+    <div>
+      <p>글 번호 : {{ article.pk }}</p>
+      <a href="{% url "articles:detail" article.pk %}">{{ article.title}}</a>
+      <p>글 내용 : {{ article.content }}</p>
+    </div>
+    <br>
+    <hr>
+  {% endfor %}
+{% endblock content %}

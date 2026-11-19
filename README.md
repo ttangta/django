@@ -4019,3 +4019,84 @@ QuerySet API는 이러한 ORM을 활용하여 CRUD 작업을 쉬복 일관된 �
 
 단, ORM이 모든 상황에서 SQL보다 빠르거나 효율적인 것은 아님
 
+<br>
+<br>
+
+## 38. ORM with View - Part02. Read, Create
+
+### 게시글 전체 조회 & 단일 조회
+
+#### 0. 초기 작업 (프로젝트 생성, 앱 생성, 앱 등록 및 추가 template 경로 등록)
+```bash
+# Django 프로젝트 생성
+django-admin startproject orm_with_view_2 .
+
+# articles 앱 생성
+python manange.py startapp articles
+```
+[Django 프로젝트 구조](./images/Django%20프로젝트%20구조.png) &nbsp; | &nbsp; [article 앱 등록](./images/articles앱%20등록.png) | &nbsp; [추가 Template 경로 등록](./images/추가%20template%20경로%20등록.png) | &nbsp; | [base HTML 작성](./images/프로젝트%20basehtml.jpg)
+
+<br>
+
+#### 1. 프로젝트 초기 설정 (`urls.py`)
+
+[article 앱에 URL 처리 위임](./images/프로젝트%20ulrs.png)
+
+<br>
+
+#### 2. article 앱 작성
+
+#### `articles/urls.py` 생성 및 URL 라우팅
+```python
+from django.urls import path
+from .import views
+
+app_name='articles'
+
+urlpatterns = [
+  path('', views.index, name='index'),
+  path('<int:pk>/', views.detail, name='detail'),
+]
+```
+<br>
+
+#### `articles/models.py` 모델 클래스 작성
+```python
+from django.db import models
+
+class Article(model.Model):
+  title=models.CharField(max_length=10)
+  content=models.TextField()
+  created_at=models.DateTimeField(auto_now_add=True)
+  updated_at=models.DateTimeField(auto_now=True)
+```
+
+<br>
+
+#### `articles/views.py` view 함수 작성
+```python
+from django.shortcuts import render
+from .models import Article
+
+def index(request):
+  articles = Article.objects.all()
+
+  context = {
+    'articles': articles
+  }
+
+  return render(request, 'articles/index.html', context)
+
+def detail(request, pk):
+  article = Article.objects.get(pk=pk)
+
+  context = {
+    'article': article
+  }
+
+  return render(request, 'article/detail.html', contenxt)
+```
+
+`articles/templates/articles` 내부 템플릿
+
+[index.html](./images/articles_index.png) &nbsp; | &nbsp; [detail.html](./images/articles_detail.png)

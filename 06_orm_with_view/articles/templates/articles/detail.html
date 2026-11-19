@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% block head %}
+  <title>{{article.pk}} 번째 게시글 상세보기</title>
+{% endblock head %}
+
+{% block content %}
+  <h1>{{ article.title }}</h1>
+  <hr>
+  <p>{{ article.content }}</p>
+  <p>작성일 : {{ article.created_at }}</p>
+  <p>수정일 : {{ article.updated_at }}</p>
+  <hr>
+  <a href="{% url "articles:index" %}">메인페이지로 이동</a>
+{% endblock content %}
